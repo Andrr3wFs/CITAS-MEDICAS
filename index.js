@@ -15,17 +15,13 @@ module.constructor.prototype.require = function(path) {
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
 
 app.use(cors());
 app.use(express.json());
-
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.send('Backend funcionando 🚀');
-});
 
 const loginRoutes = require('./Backend/src/ruta/login');
 const registroRoutes = require('./Backend/src/ruta/registro');
@@ -55,6 +51,15 @@ app.use(metricsRoutes);
 app.use('/admin', adminRoutes);
 app.use('/doctor', doctorRoutes);
 app.use('/paciente', patientRoutes);
+
+// ==========================================
+// CONFIGURACIÓN DEL FRONTEND (Vite / React)
+// ==========================================
+app.use(express.static(path.join(__dirname, 'Frontend/dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Frontend/dist', 'index.html'));
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
