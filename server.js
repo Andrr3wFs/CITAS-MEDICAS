@@ -13,19 +13,19 @@ app.get('/', (req, res) => {
   res.send('Backend funcionando 🚀');
 });
 
-const loginRoutes = require('./login');
-const registroRoutes = require('./registro');
-const appointmentsRoutes = require('./appointments');
-const pushRoutes = require('./push');
-const accessRequestsRoutes = require('./accessRequests');
-const admissionsRoutes = require('./admissions');
-const integrationRoutes = require('./integration');
-const metricsRoutes = require('./metrics');
-const adminRoutes = require('./admin');
-const doctorRoutes = require('./doctor');
-const patientRoutes = require('./patient');
-const diagnosesRoutes = require('./diagnoses');
-const { router: verificationRoutes } = require('./verification');
+const loginRoutes = require('./ruta/login');
+const registroRoutes = require('./ruta/registro');
+const appointmentsRoutes = require('./ruta/appointments');
+const pushRoutes = require('./ruta/push');
+const accessRequestsRoutes = require('./ruta/accessRequests');
+const admissionsRoutes = require('./ruta/admissions');
+const integrationRoutes = require('./ruta/integration');
+const metricsRoutes = require('./ruta/metrics');
+const adminRoutes = require('./ruta/admin');
+const doctorRoutes = require('./ruta/doctor');
+const patientRoutes = require('./ruta/patient');
+const diagnosesRoutes = require('./ruta/diagnoses');
+const { router: verificationRoutes } = require('./ruta/verification');
 
 
 app.use(loginRoutes);
