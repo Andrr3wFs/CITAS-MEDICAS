@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 import api from './api'
@@ -246,57 +246,8 @@ function App() {
 
 function AuthPortal({ showRegister, onShowRegister, onShowLogin, loginProps }) {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [isPulseAudioEnabled, setIsPulseAudioEnabled] = useState(false)
-  const audioContextRef = useRef(null)
-  const pulseAudioStartedRef = useRef(false)
-
-  useEffect(() => {
-    if (!isPulseAudioEnabled) return undefined
-
-    const playPulseTone = () => {
-      const context = audioContextRef.current
-      if (!context || context.state !== 'running') return
-
-      const oscillator = context.createOscillator()
-      const gain = context.createGain()
-      const now = context.currentTime
-
-      oscillator.type = 'sine'
-      oscillator.frequency.setValueAtTime(880, now)
-      oscillator.frequency.exponentialRampToValueAtTime(660, now + 0.075)
-      gain.gain.setValueAtTime(0.0001, now)
-      gain.gain.exponentialRampToValueAtTime(0.06, now + 0.008)
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11)
-      oscillator.connect(gain)
-      gain.connect(context.destination)
-      oscillator.start(now)
-      oscillator.stop(now + 0.12)
-    }
-
-    playPulseTone()
-    const pulseInterval = window.setInterval(playPulseTone, 1600)
-
-    return () => window.clearInterval(pulseInterval)
-  }, [isPulseAudioEnabled])
-
-  useEffect(() => () => {
-    audioContextRef.current?.close().catch(() => {})
-  }, [])
-
-  const enablePulseAudio = () => {
-    if (pulseAudioStartedRef.current) return
-
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext
-    if (!AudioContextClass) return
-
-    pulseAudioStartedRef.current = true
-    audioContextRef.current = new AudioContextClass()
-    audioContextRef.current.resume().catch(() => {})
-    setIsPulseAudioEnabled(true)
-  }
 
   const toggleLogin = () => {
-    enablePulseAudio()
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
 
     setIsLoginOpen((isOpen) => {
