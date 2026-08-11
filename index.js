@@ -14,20 +14,6 @@ module.constructor.prototype.require = function(path) {
 
 require('dotenv').config();
 const express = require('express');
-// ... el resto de tu código de siempre ...const originalRequire = module.constructor.prototype.require;
-module.constructor.prototype.require = function(path) {
-  try {
-    return originalRequire.apply(this, arguments);
-  } catch (err) {
-    if (err.code === 'MODULE_NOT_FOUND') {
-      console.error(`\n>>> ERROR REAL: Node.js no pudo encontrar este modulo/archivo: "${path}" (Requerido desde: ${this.filename})\n`);
-    }
-    throw err;
-  }
-};
-
-require('dotenv').config();
-const express = require('express');
 const cors = require('cors');
 
 const app = express();
