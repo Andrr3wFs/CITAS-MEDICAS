@@ -13,20 +13,21 @@ app.get('/', (req, res) => {
   res.send('Backend funcionando 🚀');
 });
 
-// Importar y usar rutas
-const loginRoutes = require('./src/routes/login');
-const registroRoutes = require('./src/routes/registro');
-const appointmentsRoutes = require('./src/routes/appointments');
-const pushRoutes = require('./src/routes/push');
-const accessRequestsRoutes = require('./src/routes/accessRequests');
-const admissionsRoutes = require('./src/routes/admissions');
-const integrationRoutes = require('./src/routes/integration');
-const metricsRoutes = require('./src/routes/metrics');
-const adminRoutes = require('./src/routes/admin');
-const doctorRoutes = require('./src/routes/doctor');
-const patientRoutes = require('./src/routes/patient');
-const diagnosesRoutes = require('./src/routes/diagnoses');
-const { router: verificationRoutes } = require('./src/routes/verification');
+// Importar y usar rutas - Ajustado a la carpeta 'ruta/'
+const loginRoutes = require('./ruta/login');
+const registroRoutes = require('./ruta/registro');
+const appointmentsRoutes = require('./ruta/appointments');
+const pushRoutes = require('./ruta/push');
+const accessRequestsRoutes = require('./ruta/accessRequests');
+const admissionsRoutes = require('./ruta/admissions');
+const integrationRoutes = require('./ruta/integration');
+const metricsRoutes = require('./ruta/metrics');
+const adminRoutes = require('./ruta/admin');
+const doctorRoutes = require('./ruta/doctor');
+const patientRoutes = require('./ruta/patient');
+const diagnosesRoutes = require('./ruta/diagnoses');
+const { router: verificationRoutes } = require('./ruta/verification');
+
 
 app.use(loginRoutes);
 app.use(registroRoutes);
