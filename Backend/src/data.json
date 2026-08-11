@@ -1,0 +1,383 @@
+{
+  "appointments": [
+    {
+      "id": 4,
+      "nombre": "salome",
+      "sintoma": "Dolor en el pecho intenso",
+      "fecha": "2026-03-29",
+      "hora": "13:39",
+      "doctor": "Dr. García",
+      "doctorUsername": "doctor1",
+      "estado": "aprobada",
+      "diagnostico": "Dolor torácico de origen a determinar. Se debe descartar evento cardiovascular agudo.",
+      "clinicalHistory": {
+        "medicalHistory": "",
+        "diagnosis": "Dolor torácico de origen a determinar. Se debe descartar evento cardiovascular agudo.",
+        "observations": "Paciente consciente, orientada, con signos de dolor evidente. Se recomienda monitoreo constante y evaluación inmediata con estudios complementarios (electrocardiograma, análisis de sangre).",
+        "treatment": "Administración de analgésicos bajo supervisión médica. Oxígeno suplementario si es necesario. Preparación para manejo de urgencia según evolución",
+        "indications": "Reposo absoluto. Evitar esfuerzos físicos. Traslado a centro médico especializado si los síntomas persisten o empeoran.",
+        "followUp": "Reevaluación en las próximas horas. Control médico continuo y realización de exámenes diagnósticos para confirmar causa del dolor."
+      },
+      "patientId": "salome",
+      "especialidad": ""
+    },
+    {
+      "id": 3,
+      "nombre": "freycamargo",
+      "sintoma": "Vómitos o diarrea",
+      "fecha": "2026-03-29",
+      "hora": "14:00",
+      "doctor": "Dra. Martínez",
+      "doctorUsername": "doctor2",
+      "estado": "aprobada",
+      "diagnostico": "",
+      "clinicalHistory": {
+        "medicalHistory": "",
+        "diagnosis": "",
+        "observations": "",
+        "treatment": "",
+        "indications": "",
+        "followUp": ""
+      },
+      "patientId": "freycamargo",
+      "especialidad": ""
+    },
+    {
+      "id": 5,
+      "nombre": "felipev",
+      "sintoma": "Fiebre Alta",
+      "fecha": "2026-03-30",
+      "hora": "10:45",
+      "doctor": "Dra. Fernández",
+      "doctorUsername": "doctor4",
+      "estado": "aprobada",
+      "diagnostico": "",
+      "clinicalHistory": {
+        "medicalHistory": "",
+        "diagnosis": "",
+        "observations": "",
+        "treatment": "",
+        "indications": "",
+        "followUp": ""
+      },
+      "patientId": "felipev",
+      "especialidad": ""
+    },
+    {
+      "id": 6,
+      "nombre": "paciente1",
+      "sintoma": "Dolor en el pecho intenso",
+      "fecha": "2026-08-10",
+      "hora": "08:00",
+      "doctor": "Dr. García",
+      "doctorUsername": "doctor1",
+      "estado": "pendiente",
+      "diagnostico": "",
+      "clinicalHistory": {
+        "medicalHistory": "",
+        "diagnosis": "",
+        "observations": "",
+        "treatment": "",
+        "indications": "",
+        "followUp": ""
+      },
+      "patientId": "paciente1",
+      "especialidad": ""
+    },
+    {
+      "id": 7,
+      "nombre": "paciente1",
+      "sintoma": "Dolor en el pecho intenso",
+      "fecha": "2026-04-03",
+      "hora": "10:30",
+      "doctor": "Dr. García",
+      "doctorUsername": "doctor1",
+      "estado": "pendiente",
+      "diagnostico": "",
+      "clinicalHistory": {
+        "medicalHistory": "",
+        "diagnosis": "",
+        "observations": "",
+        "treatment": "",
+        "indications": "",
+        "followUp": ""
+      },
+      "patientId": "paciente1",
+      "especialidad": ""
+    },
+    {
+      "id": 8,
+      "nombre": "paciente1",
+      "sintoma": "Dificultad para respirar",
+      "fecha": "2026-04-06",
+      "hora": "16:00",
+      "doctor": "Dra. Fernández",
+      "doctorUsername": "doctor4",
+      "estado": "pendiente",
+      "diagnostico": "",
+      "clinicalHistory": {
+        "medicalHistory": "",
+        "diagnosis": "",
+        "observations": "",
+        "treatment": "",
+        "indications": "",
+        "followUp": ""
+      },
+      "patientId": "paciente1",
+      "especialidad": ""
+    },
+    {
+      "id": 9,
+      "nombre": "freycamargo2003",
+      "sintoma": "Vómitos o diarrea",
+      "fecha": "2026-05-06",
+      "hora": "09:15",
+      "doctor": "Dra. Martínez",
+      "doctorUsername": "doctor2",
+      "estado": "pendiente",
+      "diagnostico": "",
+      "clinicalHistory": {
+        "medicalHistory": "",
+        "diagnosis": "",
+        "observations": "",
+        "treatment": "",
+        "indications": "",
+        "followUp": ""
+      },
+      "patientId": "freycamargo2003",
+      "especialidad": ""
+    },
+    {
+      "id": 10,
+      "nombre": "paciente1",
+      "patientId": "paciente1",
+      "sintoma": "Dolor en el pecho intenso",
+      "fecha": "2026-08-10",
+      "hora": "09:45",
+      "doctor": "Dr. García",
+      "doctorUsername": "doctor1",
+      "estado": "pendiente",
+      "diagnostico": "",
+      "clinicalHistory": {
+        "medicalHistory": "",
+        "diagnosis": "",
+        "observations": "",
+        "treatment": "",
+        "indications": "",
+        "followUp": ""
+      },
+      "especialidad": ""
+    }
+  ],
+  "users": [
+    {
+      "role": "admin",
+      "nombre": "Admin",
+      "usuario": "admin",
+      "password": "$2b$10$bcsuSyJkfo9GBHY.1w9bEOLS7qC1TP9c5lJK.kgpKzNTu0heQD5yq"
+    },
+    {
+      "role": "doctor",
+      "nombre": "Dr. García",
+      "usuario": "doctor1",
+      "password": "$2b$10$ywFWLNlFXfVIL.X79KzmZOdU7D0cZP9eleJkDdeqz5lXqC.NvlOs."
+    },
+    {
+      "role": "doctor",
+      "nombre": "Dra. Martínez",
+      "usuario": "doctor2",
+      "password": "$2b$10$UCRZzMzdx88Sg8NwZrm7Ue98NPC47H8XG.gxBOClcUwRby1OPg472"
+    },
+    {
+      "role": "doctor",
+      "nombre": "Dr. López",
+      "usuario": "doctor3",
+      "password": "$2b$10$mC7CYYsHZwMRry5x6HC5c.pA5m3tXsSv2YLy2cNtZp7zAp45Euh56"
+    },
+    {
+      "role": "doctor",
+      "nombre": "Dra. Fernández",
+      "usuario": "doctor4",
+      "password": "$2b$10$J3rzRzPaDuthAlFBabvbCO35P8lyfnzwCcooH8wLajH002MzCzKo6"
+    },
+    {
+      "role": "paciente",
+      "nombre": "paciente1",
+      "usuario": "paciente1",
+      "password": "$2b$10$.gXhH69jsluTiMf05lPDN.1dsUlNrwrEV9qEum6qY9klX4sRiEdUq",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "diana sanchez leon",
+      "usuario": "diana sanchez leon",
+      "password": "$2b$10$yMbI6.sggapQB74idghInuJThsQJBW/y9RHbALQu36qdi2VMwayiy",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "erick",
+      "usuario": "erick",
+      "password": "$2b$10$6wW.weKMNB5yrb97kl8b2e7L0x.r/lbWeTAy3TxnGLCjn2VXl2s6S",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "salome",
+      "usuario": "salome",
+      "password": "$2b$10$6AQ70/.8Kw6lKKLHb3BzBeGEV2bKNT435JkstttWOL/0HEGx4dxAe",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "freycamargo",
+      "usuario": "freycamargo",
+      "password": "$2b$10$nWKPDUntSiiqnSOqmOY/me1I8YQkFK7A/2xbIbisRusS8x7HjdDoC",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "cristian",
+      "usuario": "cristian",
+      "password": "$2b$10$vK1h/AvwR71Nzl.mkkfMWum.71GWuqPexocZzCMDG1f5I7uImrabi",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "cristian123456789",
+      "usuario": "cristian123456789",
+      "password": "$2b$10$IIZiV2b/LdiUTkIqwSGUKOo7mnLTJ9LBk8qrMczUTgY963q0a4CK.",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "carls12",
+      "usuario": "carls12",
+      "password": "$2b$10$unlkKNXWl/e1DQRK7wwfpeMn7WMMAucJsL9nmxFmwoCqxVAD6Rg5u",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "andr3w",
+      "usuario": "andr3w",
+      "password": "$2b$10$P09SDjEKIkrLMa3qMcaZ4uTghnVeUnZqLljvACb8ub8eHOd96vDqi",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "andrew",
+      "usuario": "andrew",
+      "password": "$2b$10$cu0oKMpjU4nompitEn4N4Ovpt2B3.vANmSuh/cm9HMduSFnv07Wtu",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "copilottestuser",
+      "usuario": "copilottestuser",
+      "password": "$2b$10$4KOMS.cKNGSWyNUc2WzRbuQ4adORkCBVmjwINiE4QsSv/13iYRXDe",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "copilotproxyuser",
+      "usuario": "copilotproxyuser",
+      "password": "$2b$10$bNU4pu8YKPbzCg73LKoqmeLIzIvEHAqQ51sBN.UishorYGbAeZTlG",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "registroprueba1774823262",
+      "usuario": "registroprueba1774823262",
+      "password": "$2b$10$NhVETLd0.GzJZfO0ZgacMu5l2FiZvmCjEeardjGZ60rHzYd6pMI9.",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "felipev",
+      "usuario": "felipev",
+      "password": "$2b$10$P4aMy9jw8gAAls4CcA0TYOlw80UOKqbfpOqeAjH/UF7KeOFS3MeeO",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "juanz2",
+      "usuario": "juanz2",
+      "password": "$2b$10$4kn5yHRUkAxrqxrlYISel.YcMVX2o/DufBjTN.h3EwVcSJQF1XLfK",
+      "estadoAprobacion": "aprobado"
+    },
+    {
+      "role": "paciente",
+      "nombre": "freycamargo2003",
+      "usuario": "freycamargo2003",
+      "password": "$2b$10$NDKz4AuI09PG6/E4rBrnFeRjTnXmGyDoMTpwGqVSe9/9UvsJTkgnO",
+      "estadoAprobacion": "aprobado"
+    }
+  ],
+  "pushSubscriptions": [],
+  "notificationConfig": {
+    "subject": "mailto:admin@saludvida.local",
+    "vapidKeys": {
+      "publicKey": "BF_yiOWvQAThU5sCUEd-2lSJe4VQYMAWpRvdzLsKRGXwTvxNhcJHb87VkgPsoxyOGQzrFu_ev9lbNoqmv4qqZkM",
+      "privateKey": "oozzJowTXQGi7v6EeDuN3k8gTSE8DdkW5gyUvJkODRU"
+    }
+  },
+  "accessRequests": [
+    {
+      "id": 1784417349578,
+      "usuario": "andrew23_y@hotmail.com",
+      "password": "$2b$10$fIHj7GPCmzND1Hi.nFyl3.3cC9AuPtEN8mER9mFgxMMJOTZdKne9m",
+      "status": "pending",
+      "requestedAt": "2026-07-18T23:29:09.578Z",
+      "role": "paciente",
+      "nombre": "andrew23_y@hotmail.com"
+    },
+    {
+      "id": 1785964127891,
+      "usuario": "av728095@gmail.com",
+      "password": "$2b$10$bnTxxj5.FIntZMJVVjXMjeRQhpciz5SMrLbqbH06wBbaBZfXDTZw.",
+      "status": "rejected",
+      "requestedAt": "2026-08-05T21:08:47.891Z",
+      "role": "paciente",
+      "nombre": "av728095@gmail.com",
+      "rejectionReason": "no se le permite en este momento",
+      "rejectedAt": "2026-08-08T19:53:59.031Z",
+      "rejectedBy": "admin",
+      "registrationAvailableAt": "2026-08-10T19:53:59.031Z"
+    }
+  ],
+  "admissions": [],
+  "beds": [
+    {
+      "id": 1,
+      "name": "C-101",
+      "room": "Pabellón A",
+      "type": "general",
+      "status": "disponible"
+    },
+    {
+      "id": 2,
+      "name": "C-102",
+      "room": "Pabellón A",
+      "type": "uci",
+      "status": "disponible"
+    },
+    {
+      "id": 3,
+      "name": "C-201",
+      "room": "Pabellón B",
+      "type": "general",
+      "status": "disponible"
+    },
+    {
+      "id": 4,
+      "name": "C-202",
+      "room": "Pabellón B",
+      "type": "maternidad",
+      "status": "ocupada"
+    }
+  ],
+  "auditLogs": [],
+  "integrationConfig": {
+    "labEndpoint": ""
+  }
+}

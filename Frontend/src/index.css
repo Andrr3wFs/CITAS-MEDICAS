@@ -1,0 +1,59 @@
+html,
+body,
+#root{
+  min-height:100vh;
+  width:100%;
+}
+
+*,
+*::before,
+*::after{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:#f2f2f2;
+  -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
+}
+
+#root{
+  width:100%;
+  overflow-x:hidden;
+}
+
+.container{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-box{
+  width:350px;
+  padding:30px;
+  background:white;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.login-box h2{
+  text-align:center;
+}
+
+.login-box input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+}
+
+.login-box button{
+  width:100%;
+  padding:10px;
+  background:#1a73e8;
+  color:white;
+  border:none;
+  border-radius:5px;
+}

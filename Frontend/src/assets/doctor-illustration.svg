@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 620" role="img" aria-labelledby="title desc">
+  <title id="title">Médica sonriente</title>
+  <desc id="desc">Ilustración vectorial de una médica con bata blanca y estetoscopio.</desc>
+  <defs>
+    <linearGradient id="coat" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#dff7fb"/></linearGradient>
+    <linearGradient id="scrubs" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#32c5d6"/><stop offset="1" stop-color="#168be0"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#075e89" flood-opacity=".2"/></filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <ellipse cx="278" cy="572" rx="172" ry="20" fill="#087bb7" opacity=".16"/>
+    <path d="M133 565c9-128 42-192 119-211h56c86 20 124 86 132 211z" fill="url(#coat)"/>
+    <path d="M218 359h120l-25 99h-71z" fill="url(#scrubs)"/>
+    <path d="M230 362c6 43 22 64 50 64s45-21 50-64" fill="#f3b58f"/>
+    <path d="M171 264c0-89 47-146 109-146s109 57 109 146c0 73-44 124-109 124s-109-51-109-124z" fill="#f5bf9b"/>
+    <path d="M171 267c-28-88 19-170 109-170 81 0 119 66 104 145-16-17-30-34-36-70-47 35-105 47-170 46z" fill="#193f65"/>
+    <path d="M182 269c2 73 42 119 98 119-46-13-57-52-56-101 41 3 92-16 123-54 13 24 21 38 38 47-2 63-36 95-72 108 49-10 76-50 76-120v-17c-22-27-34-58-39-91-44 40-105 57-176 50-1 22 1 41 8 59z" fill="#193f65"/>
+    <circle cx="237" cy="271" r="7" fill="#18354a"/><circle cx="322" cy="271" r="7" fill="#18354a"/>
+    <path d="M261 324c13 10 30 10 43 0" fill="none" stroke="#c86662" stroke-linecap="round" stroke-width="5"/>
+    <path d="M227 246c13-9 28-9 40-1M299 245c13-8 27-8 39 1" fill="none" stroke="#193f65" stroke-linecap="round" stroke-width="6"/>
+    <path d="M225 364l55 78 55-78 48 202H177z" fill="url(#coat)"/>
+    <path d="M225 364l55 78-27 28-51-80zM335 364l-55 78 27 28 51-80z" fill="#c7edf4"/>
+    <path d="M238 404c-21 39-12 101 42 111 54-10 63-72 42-111" fill="none" stroke="#1c7fb4" stroke-linecap="round" stroke-width="8"/>
+    <circle cx="280" cy="515" r="20" fill="#eefcff" stroke="#1c7fb4" stroke-width="8"/>
+    <path d="M259 501v-15c0-23 15-38 21-38s21 15 21 38v15" fill="none" stroke="#1c7fb4" stroke-linecap="round" stroke-width="8"/>
+    <path d="M201 429l-46 64c-10 14-4 33 13 39 13 5 28-1 34-14l32-66z" fill="#f5bf9b"/>
+    <path d="M359 428l45 66c10 14 4 32-13 38-13 5-28-1-34-14l-32-65z" fill="#f5bf9b"/>
+    <rect x="102" y="170" width="82" height="53" rx="13" fill="#e7fbfd" transform="rotate(-12 102 170)"/>
+    <path d="M130 184h27M143 171v27" stroke="#20abc6" stroke-linecap="round" stroke-width="7"/>
+    <circle cx="442" cy="178" r="35" fill="#e7fbfd"/><path d="M425 178h34M442 161v34" stroke="#20abc6" stroke-linecap="round" stroke-width="7"/>
+  </g>
+</svg>

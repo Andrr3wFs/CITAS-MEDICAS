@@ -1,0 +1,13 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="28" fill="white"/>
+  <text x="8" y="80" fill="#161616" font-family="Segoe UI, Arial, sans-serif" font-size="72" font-weight="800" letter-spacing="-4">G</text>
+  <text x="54" y="80" fill="#6F34A5" font-family="Segoe UI, Arial, sans-serif" font-size="72" font-weight="800" letter-spacing="-4">M</text>
+  <circle cx="91" cy="47" r="20" fill="white" stroke="#6F34A5" stroke-width="6"/>
+  <path d="M104 61L118 75" stroke="#6F34A5" stroke-width="7" stroke-linecap="round"/>
+  <path d="M80 35H88" stroke="#6F34A5" stroke-width="4" stroke-linecap="round"/>
+  <path d="M84 31V39" stroke="#6F34A5" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="98" cy="41" r="3.5" fill="#6F34A5"/>
+  <rect x="80" y="55" width="8" height="13" rx="1.5" fill="#6F34A5"/>
+  <rect x="91" y="49" width="8" height="19" rx="1.5" fill="#6F34A5"/>
+  <rect x="102" y="43" width="8" height="25" rx="1.5" fill="#6F34A5"/>
+</svg>

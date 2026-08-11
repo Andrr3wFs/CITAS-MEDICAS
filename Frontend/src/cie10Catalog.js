@@ -1,0 +1,16 @@
+export const cie10Catalog = [
+  { code: "A09", label: "Gastroenteritis y colitis de origen no especificado" },
+  { code: "E11.9", label: "Diabetes mellitus tipo 2 sin complicaciones" },
+  { code: "E66.9", label: "Obesidad, no especificada" },
+  { code: "F41.9", label: "Trastorno de ansiedad, no especificado" },
+  { code: "I10", label: "Hipertensión esencial (primaria)" },
+  { code: "J00", label: "Rinofaringitis aguda (resfriado común)" },
+  { code: "J45.9", label: "Asma, no especificada" },
+  { code: "K21.9", label: "Enfermedad por reflujo gastroesofágico sin esofagitis" },
+  { code: "M54.5", label: "Lumbalgia" },
+  { code: "N39.0", label: "Infección de vías urinarias, sitio no especificado" },
+  { code: "R10.4", label: "Dolor abdominal, otros y no especificados" },
+  { code: "R50.9", label: "Fiebre, no especificada" },
+  { code: "R51.9", label: "Cefalea, no especificada" },
+  { code: "R07.9", label: "Dolor torácico, no especificado" },
+];

@@ -1,0 +1,33 @@
+version: 3
+
+agent:
+  update_channel: stable
+  web_addr: 127.0.0.1:4040
+  console_ui: false
+
+
+
+endpoints:
+  - name: hospital-backend
+    url: https://hospital-backend.internal
+    upstream:
+      url: http://localhost:5000
+      protocol: http1
+
+  - name: hospital-public
+    traffic_policy:
+      on_http_request:
+        - name: RouteApiToBackend
+          expressions:
+            - req.url.path.startsWith('/api')
+          actions:
+            - type: url-rewrite
+              config:
+                from: /api/?(.*)?
+                to: /$1
+            - type: forward-internal
+              config:
+                url: https://hospital-backend.internal
+    upstream:
+      url: http://localhost:5173
+      protocol: http1

@@ -1,0 +1,15 @@
+<svg width="720" height="260" viewBox="0 0 720 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="260" rx="28" fill="white"/>
+  <text x="52" y="150" fill="#161616" font-family="Segoe UI, Arial, sans-serif" font-size="136" font-weight="800" letter-spacing="-8">G</text>
+  <text x="212" y="150" fill="#6F34A5" font-family="Segoe UI, Arial, sans-serif" font-size="136" font-weight="800" letter-spacing="-8">M</text>
+  <circle cx="412" cy="95" r="56" fill="white" stroke="#6F34A5" stroke-width="12"/>
+  <path d="M450 133L498 181" stroke="#6F34A5" stroke-width="14" stroke-linecap="round"/>
+  <path d="M374 66H392" stroke="#6F34A5" stroke-width="7" stroke-linecap="round"/>
+  <path d="M383 57V75" stroke="#6F34A5" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="432" cy="79" r="7" fill="#6F34A5"/>
+  <rect x="374" y="116" width="20" height="36" rx="3" fill="#6F34A5"/>
+  <rect x="404" y="100" width="20" height="52" rx="3" fill="#6F34A5"/>
+  <rect x="434" y="86" width="20" height="66" rx="3" fill="#6F34A5"/>
+  <text x="54" y="228" fill="#161616" font-family="Segoe UI, Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="6">DIAG</text>
+  <text x="242" y="228" fill="#6F34A5" font-family="Segoe UI, Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="6">NÓSTICO</text>
+</svg>
