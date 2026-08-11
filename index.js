@@ -23,6 +23,10 @@ const PORT = Number(process.env.PORT) || 5000;
 app.use(cors());
 app.use(express.json());
 
+// 1. ARCHIVOS ESTÁTICOS PRIMERO (Para que el favicon y assets carguen libremente)
+app.use(express.static(path.join(__dirname, 'Frontend/dist')));
+
+// 2. RUTAS DE LA API
 const loginRoutes = require('./Backend/src/ruta/login');
 const registroRoutes = require('./Backend/src/ruta/registro');
 const appointmentsRoutes = require('./Backend/src/ruta/appointments');
@@ -52,11 +56,7 @@ app.use('/admin', adminRoutes);
 app.use('/doctor', doctorRoutes);
 app.use('/paciente', patientRoutes);
 
-// ==========================================
-// CONFIGURACIÓN DEL FRONTEND (Vite / React)
-// ==========================================
-app.use(express.static(path.join(__dirname, 'Frontend/dist')));
-
+// 3. COMODÍN DEL FRONTEND AL FINAL ABSOLUTO
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'Frontend/dist', 'index.html'));
 });
