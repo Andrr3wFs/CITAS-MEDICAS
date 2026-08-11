@@ -13,7 +13,6 @@ app.get('/', (req, res) => {
   res.send('Backend funcionando 🚀');
 });
 
-// Importar y usar rutas ajustadas a la estructura real
 const loginRoutes = require('./login');
 const registroRoutes = require('./registro');
 const appointmentsRoutes = require('./appointments');
