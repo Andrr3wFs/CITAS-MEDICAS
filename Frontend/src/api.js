@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 
+const NGROK_API_URL = 'https://tricrotic-noninhibitive-carlie.ngrok-free.dev/api';
 const DEFAULT_LOCAL_API_URL = 'http://127.0.0.1:5000';
 
 const resolveApiBaseUrl = () => {
@@ -12,7 +13,7 @@ const resolveApiBaseUrl = () => {
   }
 
   if (import.meta.env.DEV) {
-    return '/api';
+    return NGROK_API_URL;
   }
 
   if (typeof window !== 'undefined') {
@@ -21,11 +22,11 @@ const resolveApiBaseUrl = () => {
     const isLocalHostname = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 
     if (isHttpPage && !isLocalHostname) {
-      return `${origin}/api`;
+      return NGROK_API_URL;
     }
   }
 
-  return DEFAULT_LOCAL_API_URL;
+  return NGROK_API_URL;
 };
 
 // Crear instancia de Axios
