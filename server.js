@@ -1,3 +1,15 @@
+const originalRequire = module.constructor.prototype.require;
+module.constructor.prototype.require = function(path) {
+  try {
+    return originalRequire.apply(this, arguments);
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      console.error(`\n>>> ERROR REAL: Node.js no pudo encontrar este modulo/archivo: "${path}" (Requerido desde: ${this.filename})\n`);
+    }
+    throw err;
+  }
+};
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -27,7 +39,6 @@ const patientRoutes = require('./ruta/patient');
 const diagnosesRoutes = require('./ruta/diagnoses');
 const { router: verificationRoutes } = require('./ruta/verification');
 
-
 app.use(loginRoutes);
 app.use(registroRoutes);
 app.use(verificationRoutes);
@@ -46,7 +57,6 @@ app.use('/paciente', patientRoutes);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
 
 process.on('uncaughtException', (err) => {
   console.error('ERROR NO CAPTURADO:', err);
