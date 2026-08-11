@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const router = express.Router();
-const { users, accessRequests, normalizeUsername } = require('../storage');
+const { users, accessRequests, normalizeUsername } = require('./storage');
 
 const getJwtSecret = () => process.env.JWT_SECRET || 'hospital-secret-key';
 
