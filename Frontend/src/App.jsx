@@ -103,6 +103,31 @@ function App() {
         return
       }
 
+      // Si es una cuenta de prueba y el backend falla, aplicamos el respaldo automático (fallback) de demo
+      const matchedDemo = DEMO_ACCOUNTS.find(d => d.username === normalizedUsername && d.password === nextPassword)
+      if (matchedDemo) {
+        const mockToken = 'demo-token-' + matchedDemo.id
+        const mockRole = matchedDemo.id === 'admin' ? 'admin' : matchedDemo.id === 'doctor' ? 'doctor' : 'paciente'
+        const mockUsername = matchedDemo.username
+        const mockDisplayName = matchedDemo.label
+
+        localStorage.setItem('token', mockToken)
+        localStorage.setItem('username', mockUsername)
+        localStorage.setItem('role', mockRole)
+        localStorage.setItem('displayName', mockDisplayName)
+
+        setUser({
+          token: mockToken,
+          username: mockUsername,
+          role: mockRole,
+          displayName: mockDisplayName
+        })
+
+        setUsername('')
+        setPassword('')
+        return
+      }
+
       const nextMessage = err.response?.data?.message
         || (err.request
           ? 'No se pudo conectar con el servidor. Verifica que el backend este encendido y que la URL del API sea correcta.'
@@ -625,6 +650,5 @@ function VerificationForm({ credentials, onVerified, onCancel }) {
     </div>
   )
 }
-
 
 export default App
