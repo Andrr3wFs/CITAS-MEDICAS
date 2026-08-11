@@ -47,3 +47,12 @@ app.use('/paciente', patientRoutes);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+
+process.on('uncaughtException', (err) => {
+  console.error('ERROR NO CAPTURADO:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('PROMESA RECHAZADA NO CAPTURADA:', reason);
+});
