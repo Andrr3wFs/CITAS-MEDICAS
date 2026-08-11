@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# dist  <-- Comenté esta línea para que Git permita subir tu carpeta 'dist'
 dist-ssr
 *.local
 

@@ -1,0 +1,16 @@
+{
+  "name": "MediCenter",
+  "short_name": "MediCenter",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf8ff",
+  "theme_color": "#6f34a5",
+  "icons": [
+    {
+      "src": "/saludsys-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
