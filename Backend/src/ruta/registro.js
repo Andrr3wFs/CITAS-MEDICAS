@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-// Aquí ya se importa normalizeUsername, por eso causaba conflicto abajo
-const { users, accessRequests, saveData, normalizeUsername, hashPasswordSync } = require('./storage');
+const { users, accessRequests, saveData, normalizeUsername, hashPasswordSync } = require('../storage');
 const { sendNewAccessRequestNotification } = require('../emailService');
 
 // Get admin emails from users

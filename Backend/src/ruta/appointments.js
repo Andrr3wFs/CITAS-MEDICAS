@@ -1,7 +1,7 @@
 // src/routes/appointments.js
 const express = require('express');
 const router = express.Router();
-const { appointments, saveData } = require('./storage');
+const { appointments, saveData } = require('../storage');
 const { getAvailabilityError } = require('../appointmentAvailability');
 const { sendPushNotificationToUsers } = require('../pushNotifications');
 const { authenticate, getRequestUserRole, getRequestUsername, normalizeUsername } = require('../auth');
@@ -295,7 +295,6 @@ router.put('/appointments/:id', auditMutation({
   const diagnosisChanged = previousAppointment.diagnostico !== appointment.diagnostico;
 
   if (statusChanged && appointment.estado === 'aprobada') {
-    // ensure pre-consult questionnaire is available for the patient
     appointment.preConsult = appointment.preConsult || { answered: false, answers: null };
 
     await sendNotificationSafely([patientUsername], {
@@ -392,7 +391,6 @@ router.post('/appointments/:id/questionnaire', async (req, res) => {
 
   saveData();
 
-  // Notify assigned doctor that questionnaire is ready
   if (appointment.doctorUsername) {
     await sendNotificationSafely([appointment.doctorUsername], {
       title: 'Cuestionario pre-consulta completado',

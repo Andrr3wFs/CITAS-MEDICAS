@@ -16,9 +16,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
-const express = require('express');
-const cors = require('cors');
-
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
 
@@ -30,19 +27,19 @@ app.get('/', (req, res) => {
   res.send('Backend funcionando 🚀');
 });
 
-const loginRoutes = require('./login');
-const registroRoutes = require('./registro');
-const appointmentsRoutes = require('./appointments');
-const pushRoutes = require('./push');
-const accessRequestsRoutes = require('./accessRequests');
-const admissionsRoutes = require('./admissions');
-const integrationRoutes = require('./integration');
-const metricsRoutes = require('./metrics');
-const adminRoutes = require('./admin');
-const doctorRoutes = require('./doctor');
-const patientRoutes = require('./patient');
-const diagnosesRoutes = require('./diagnoses');
-const { router: verificationRoutes } = require('./verification');
+const loginRoutes = require('./Backend/src/ruta/login');
+const registroRoutes = require('./Backend/src/ruta/registro');
+const appointmentsRoutes = require('./Backend/src/ruta/appointments');
+const pushRoutes = require('./Backend/src/ruta/push');
+const accessRequestsRoutes = require('./Backend/src/ruta/accessRequests');
+const admissionsRoutes = require('./Backend/src/ruta/admissions');
+const integrationRoutes = require('./Backend/src/ruta/integration');
+const metricsRoutes = require('./Backend/src/ruta/metrics');
+const adminRoutes = require('./Backend/src/ruta/admin');
+const doctorRoutes = require('./Backend/src/ruta/doctor');
+const patientRoutes = require('./Backend/src/ruta/patient');
+const diagnosesRoutes = require('./Backend/src/ruta/diagnoses');
+const { router: verificationRoutes } = require('./Backend/src/ruta/verification');
 
 app.use(loginRoutes);
 app.use(registroRoutes);
