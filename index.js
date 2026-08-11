@@ -16,6 +16,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
+const express = require('express');
+const cors = require('cors');
+
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
 
@@ -40,6 +43,7 @@ const doctorRoutes = require('./doctor');
 const patientRoutes = require('./patient');
 const diagnosesRoutes = require('./diagnoses');
 const { router: verificationRoutes } = require('./verification');
+
 app.use(loginRoutes);
 app.use(registroRoutes);
 app.use(verificationRoutes);
