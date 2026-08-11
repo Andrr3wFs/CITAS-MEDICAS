@@ -8,6 +8,8 @@
     "dev:backend": "npm --prefix Backend run dev",
     "dev:frontend": "npm --prefix Frontend run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
+    
+
   },
   "keywords": [],
   "author": "",
