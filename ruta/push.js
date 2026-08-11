@@ -4,7 +4,7 @@ const {
   getPublicVapidKey,
   removePushSubscriptionByEndpoint,
   upsertPushSubscription,
-} = require('../pushNotifications');
+} = require('./pushNotifications');
 
 router.get('/push/vapid-public-key', (req, res) => {
   res.json({ success: true, publicKey: getPublicVapidKey() });

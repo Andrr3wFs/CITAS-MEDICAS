@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { appointments, users, accessRequests, saveData, normalizeUsername, hashPasswordSync } = require('../storage');
-const { authenticate, getRequestUserRole, getRequestUsername } = require('../auth');
-const { getAvailabilityError } = require('../appointmentAvailability');
-const { auditMutation } = require('../middleware/audit');
+const { appointments, users, accessRequests, saveData, normalizeUsername, hashPasswordSync } = require('./storage');
+const { authenticate, getRequestUserRole, getRequestUsername } = require('./auth');
+const { getAvailabilityError } = require('./appointmentAvailability');
+const { auditMutation } = require('./middleware/audit');
 
 const sanitizeText = (value) => String(value || '').trim().replace(/[<>]/g, (match) => (match === '<' ? '&lt;' : '&gt;'));
 const patientAppointmentStatuses = ['solicitada', 'aprobada', 'rechazada', 'cancelada', 'pendiente', 'atendida'];

@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { appointments, saveData } = require('../storage');
-const { authenticate, getRequestUserRole, getRequestUsername } = require('../auth');
-const { auditMutation } = require('../middleware/audit');
+const { appointments, saveData } = require('./storage');
+const { authenticate, getRequestUserRole, getRequestUsername } = require('./auth');
+const { auditMutation } = require('./middleware/audit');
 
 const sanitizeText = (value) => String(value || '').trim().replace(/[<>]/g, (match) => (match === '<' ? '&lt;' : '&gt;'));
 

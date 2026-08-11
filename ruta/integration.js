@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { integrationConfig } = require('../storage');
-const { authenticate, getRequestUserRole, getRequestUsername } = require('../auth');
+const { integrationConfig } = require('./storage');
+const { authenticate, getRequestUserRole, getRequestUsername } = require('./auth');
 
 console.log('[integration] module loaded');
 

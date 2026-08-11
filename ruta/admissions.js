@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { admissions, beds, appointments, saveData, normalizeUsername } = require('../storage');
-const { authenticate, getRequestUserRole } = require('../auth');
+const { admissions, beds, appointments, saveData, normalizeUsername } = require('./storage');
+const { authenticate, getRequestUserRole } = require('./auth');
 
 const triageLevels = ['rojo', 'naranja', 'amarillo', 'verde', 'azul'];
 const admissionStatuses = ['esperando', 'en_atencion', 'hospitalizado', 'alta'];

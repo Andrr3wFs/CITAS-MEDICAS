@@ -1,5 +1,5 @@
 const express = require('express');
-const { getDatabasePool, hasDatabaseConfiguration } = require('../database');
+const { getDatabasePool, hasDatabaseConfiguration } = require('./database');
 
 const router = express.Router();
 const MAX_RESULTS = 10;
@@ -34,13 +34,13 @@ router.get('/diagnosticos/buscar', async (req, res) => {
     const codePrefix = `${query}%`;
     const [diagnoses] = await pool.execute(
       `SELECT id, codigo, descripcion
-       FROM cie10
-       WHERE codigo LIKE ? COLLATE utf8mb4_0900_ai_ci
-          OR MATCH(descripcion) AGAINST (? IN BOOLEAN MODE)
-       ORDER BY (codigo LIKE ? COLLATE utf8mb4_0900_ai_ci) DESC,
-                MATCH(descripcion) AGAINST (? IN BOOLEAN MODE) DESC,
-                codigo ASC
-       LIMIT ${MAX_RESULTS}`,
+        FROM cie10
+        WHERE codigo LIKE ? COLLATE utf8mb4_0900_ai_ci
+           OR MATCH(descripcion) AGAINST (? IN BOOLEAN MODE)
+        ORDER BY (codigo LIKE ? COLLATE utf8mb4_0900_ai_ci) DESC,
+                 MATCH(descripcion) AGAINST (? IN BOOLEAN MODE) DESC,
+                 codigo ASC
+        LIMIT ${MAX_RESULTS}`,
       [codePrefix, booleanSearch, codePrefix, booleanSearch]
     );
 

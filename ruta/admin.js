@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { appointments, users, accessRequests, saveData, isPasswordHashed, hashPasswordSync } = require('../storage');
-const { authenticate, getRequestUserRole } = require('../auth');
-const { getAvailabilityError } = require('../appointmentAvailability');
-const { auditMutation } = require('../middleware/audit');
+const { appointments, users, accessRequests, saveData, isPasswordHashed, hashPasswordSync } = require('./storage');
+const { authenticate, getRequestUserRole } = require('./auth');
+const { getAvailabilityError } = require('./appointmentAvailability');
+const { auditMutation } = require('./middleware/audit');
 
 const appointmentStatuses = ['solicitada', 'confirmada', 'reprogramada', 'rechazada'];
 

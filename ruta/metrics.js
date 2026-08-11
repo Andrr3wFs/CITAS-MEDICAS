@@ -1,6 +1,6 @@
 const express = require('express');
-const { appointments } = require('../storage');
-const { authenticate, getRequestUserRole } = require('../auth');
+const { appointments } = require('./storage');
+const { authenticate, getRequestUserRole } = require('./auth');
 
 const router = express.Router();
 
