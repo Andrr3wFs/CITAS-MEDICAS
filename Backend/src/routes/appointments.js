@@ -1,7 +1,7 @@
 // src/routes/appointments.js
 const express = require('express');
 const router = express.Router();
-const { appointments, saveData } = require('../storage');
+const { appointments, saveData } = require('./storage');
 const { getAvailabilityError } = require('../appointmentAvailability');
 const { sendPushNotificationToUsers } = require('../pushNotifications');
 const { authenticate, getRequestUserRole, getRequestUsername, normalizeUsername } = require('../auth');
