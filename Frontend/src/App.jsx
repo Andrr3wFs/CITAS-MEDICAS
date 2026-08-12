@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa'
 import api from './api'
 import "./Login.css"
 import DashboardLayout from './components/DashboardLayout'
@@ -31,6 +32,10 @@ const DEMO_ACCOUNTS = [
     password: '1234'
   }
 ]
+
+const WHATSAPP_DEMO_NUMBER = import.meta.env.VITE_WHATSAPP_DEMO_NUMBER || '573177243959'
+const WHATSAPP_DEMO_MESSAGE = 'Hola, estoy interesado en conocer la plataforma y quisiera solicitar una demostración.'
+const WHATSAPP_DEMO_URL = `https://wa.me/${WHATSAPP_DEMO_NUMBER}?text=${encodeURIComponent(WHATSAPP_DEMO_MESSAGE)}`
 
 const getDisplayName = ({ username, role, displayName }) => {
   if (role === 'admin' && ['administrador', 'administracion'].includes(String(displayName || '').trim().toLowerCase())) {
@@ -300,6 +305,19 @@ function AuthPortal({ showRegister, onShowRegister, onShowLogin, loginProps }) {
         <LogIn aria-hidden="true" size={18} />
         <span>{isLoginOpen ? 'Ocultar acceso' : 'Entrar al portal'}</span>
       </button>
+      {!isLoginOpen && (
+        <a
+          className="auth-whatsapp-demo"
+          href={WHATSAPP_DEMO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Solicitar una demostración gratuita por WhatsApp"
+          data-tooltip="Solicita una demostración gratuita"
+        >
+          <FaWhatsapp aria-hidden="true" size={20} />
+          <span>Solicitar demostración</span>
+        </a>
+      )}
       <div
         id="login-portal"
         className={`auth-shell auth-shell-login auth-overlay-slider ${showRegister ? 'right-panel-active' : ''} ${isLoginOpen ? '' : 'auth-entry-hidden'}`}
