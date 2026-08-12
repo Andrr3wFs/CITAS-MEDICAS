@@ -20,11 +20,11 @@ const path = require('path');
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
 
-// Configuración robusta de CORS para evitar bloqueos en producción y desarrollo (Ngrok)
+// Configuración robusta de CORS (incluyendo 'x-user-role' para las peticiones del frontend)
 app.use(cors({
     origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-role'],
     credentials: true
 }));
 
