@@ -6902,6 +6902,9 @@ body{
     inset: auto;
     z-index: 3;
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -6911,6 +6914,11 @@ body{
     visibility: visible;
     transform: none;
     background: linear-gradient(145deg, #f8feff, #def4fb) !important;
+  }
+
+  .auth-overlay-slider .auth-panel-login > * {
+    width: min(100%, 360px);
+    flex: 0 0 auto;
   }
 }
 
