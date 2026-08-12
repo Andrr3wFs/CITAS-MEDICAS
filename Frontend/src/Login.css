@@ -6667,4 +6667,232 @@ body{
   .auth-overlay-slider .auth-panel-login { position: absolute; inset: 0; width: auto; min-height: 0; justify-content: flex-start; overflow-y: auto; }
 }
 
+/* Narrow-screen portal layout: keep the entry experience centered and contained. */
+@media (max-width: 768px) {
+  .login-wrapper.system-on {
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    padding: 1rem;
+    background-position: center, 20% 16%, 78% 76%, 58% center;
+  }
+
+  .login-wrapper.system-on::after {
+    width: 26rem;
+    height: 26rem;
+    bottom: -18rem;
+    left: -12rem;
+  }
+
+  .auth-entry-intro {
+    width: min(calc(100% - 2rem), 26rem);
+    transform: translate(-50%, -58%);
+  }
+
+  .auth-entry-intro-logo {
+    width: 58px;
+    margin-bottom: 0.85rem;
+  }
+
+  .auth-entry-intro h1 {
+    max-width: 100%;
+    font-size: clamp(2.2rem, 11vw, 3.25rem);
+    line-height: 1.06;
+  }
+
+  .auth-entry-intro p:last-child {
+    max-width: 30ch;
+    margin-top: 0.75rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .auth-login-launcher-open {
+    left: 50%;
+    bottom: max(1.5rem, env(safe-area-inset-bottom));
+    min-width: min(190px, calc(100vw - 2rem));
+  }
+
+  .auth-login-launcher-close {
+    top: max(1rem, env(safe-area-inset-top));
+    right: 1rem;
+    left: auto;
+    bottom: auto;
+  }
+
+  .auth-shell-login,
+  .auth-overlay-slider {
+    width: 100%;
+    max-width: 100%;
+    height: min(760px, calc(100dvh - 2rem));
+    min-height: min(580px, calc(100dvh - 2rem));
+  }
+
+  .auth-overlay-slider .auth-login-brand {
+    height: 218px;
+    min-height: 218px;
+    padding: 1.4rem;
+  }
+
+  .auth-overlay-slider .auth-form-stage {
+    height: calc(100% - 218px);
+  }
+
+  .auth-login-brand h1 {
+    max-width: 10ch;
+    font-size: clamp(1.8rem, 8vw, 2.25rem);
+  }
+
+  .auth-login-brand > div > p:last-child {
+    max-width: 25ch;
+    font-size: 0.82rem;
+  }
+
+  .auth-login-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .auth-login-logo::before { width: 23px; height: 8px; }
+  .auth-login-logo::after { width: 8px; height: 23px; }
+  .auth-doctor-visual { width: min(58%, 220px); right: -0.6rem; bottom: -2rem; }
+  .clinical-ecg { height: 120px; }
+  .clinical-particle { max-width: 1.25rem; }
+}
+
+@media (max-width: 390px) {
+  .login-wrapper.system-on { padding: 0.75rem; }
+  .auth-entry-intro h1 { font-size: 2.15rem; }
+  .auth-entry-intro p:last-child { font-size: 0.86rem; }
+  .auth-overlay-slider .auth-login-brand { height: 205px; min-height: 205px; padding: 1.15rem; }
+  .auth-overlay-slider .auth-form-stage { height: calc(100% - 205px); }
+  .auth-doctor-visual { width: 185px; bottom: -1.7rem; }
+}
+
+/* Keep the introductory portal hero inside a narrow mobile viewport. */
+@media (max-width: 600px) {
+  .login-wrapper.system-on {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100vw;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    background-position: center, 22% 18%, 80% 78%, 62% center;
+  }
+
+  .login-wrapper.system-on,
+  .login-wrapper.system-on * {
+    box-sizing: border-box;
+  }
+
+  .auth-entry-intro:not(.auth-entry-intro-hidden) {
+    position: relative;
+    top: auto;
+    left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 340px);
+    max-width: calc(100vw - 2rem);
+    padding: 0;
+    transform: none;
+  }
+
+  .auth-entry-intro h1 {
+    font-size: clamp(1.9rem, 9.5vw, 2.5rem);
+    overflow-wrap: anywhere;
+  }
+
+  .auth-entry-intro p:last-child {
+    width: min(100%, 30ch);
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .auth-entry-intro-logo {
+    width: 52px;
+  }
+
+  .auth-login-launcher-open {
+    position: static;
+    flex: 0 0 auto;
+    width: min(85%, 320px);
+    max-width: calc(100vw - 2rem);
+    min-width: 0;
+    margin: 1.5rem auto 0;
+    transform: none !important;
+  }
+
+  .auth-login-launcher-open:hover {
+    transform: translateY(-2px);
+  }
+
+  .auth-shell-login,
+  .auth-overlay-slider,
+  .clinical-ecg,
+  .clinical-particle {
+    max-width: 100%;
+  }
+
+  .clinical-ecg {
+    left: 0;
+    right: 0;
+    width: auto;
+    overflow: hidden;
+  }
+
+  .auth-shell-login {
+    display: block;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .auth-overlay-slider {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .auth-overlay-slider .auth-login-brand {
+    position: relative;
+    z-index: 1;
+    inset: auto;
+    flex: 0 0 205px;
+    width: 100%;
+  }
+
+  .auth-overlay-slider .auth-form-stage {
+    position: relative;
+    z-index: 2;
+    display: block;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+    background: #f6fcff;
+  }
+
+  .auth-overlay-slider .auth-panel-login {
+    position: relative;
+    inset: auto;
+    z-index: 3;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 1.5rem 1.25rem;
+    overflow-y: auto;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    background: linear-gradient(145deg, #f8feff, #def4fb) !important;
+  }
+}
+
 
