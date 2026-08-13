@@ -1551,18 +1551,18 @@ body{
 
 .appointment-form-card {
   width: min(100%, 720px);
-  background: linear-gradient(180deg, rgba(250, 245, 255, 0.92) 0%, rgba(243, 236, 255, 0.88) 100%);
+  background: #ffffff;
   color: #0f172a;
-  padding: 1.5rem;
-  border-radius: 20px;
-  box-shadow: 0 24px 50px rgba(111, 52, 165, 0.12);
-  border: 1px solid rgba(168, 85, 247, 0.18);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(15, 118, 110, 0.16);
 }
 
 .appointment-form-title {
   text-align: center;
   margin: 0 0 1.25rem;
-  color: #4c1d95;
+  color: #0f766e;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
@@ -1591,11 +1591,17 @@ body{
   grid-column: 1 / -1;
 }
 
+.appointment-field-specialty { order: 1; }
+.appointment-field-doctor { order: 2; }
+.appointment-field-symptoms { order: 3; }
+.appointment-field-date { order: 4; }
+.appointment-field-time { order: 5; }
+
 .appointment-field label {
   display: block;
   margin-bottom: 0.4rem;
   font-weight: 700;
-  color: #5b21b6;
+  color: #134e4a;
 }
 
 .appointment-field-label-content {
@@ -1616,7 +1622,7 @@ body{
   width: 100%;
   padding: 0.9rem 1rem;
   border-radius: 14px;
-  border: 1px solid rgba(168, 85, 247, 0.22);
+  border: 1px solid rgba(15, 118, 110, 0.24);
   box-sizing: border-box;
   margin: 0;
   background: rgba(255, 255, 255, 0.88);
@@ -1628,18 +1634,18 @@ body{
 .appointment-field input:focus,
 .appointment-field select:focus {
   outline: none;
-  border-color: rgba(111, 52, 165, 0.35);
-  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.12);
+  border-color: #0f766e;
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.14);
   background: #ffffff;
 }
 
 .appointment-field select:disabled,
 .appointment-field input:disabled {
-  background: #eef2f7;
-  color: #94a3b8;
-  border-color: #d7dee8;
+  background: #edf4f2;
+  color: #78918d;
+  border-color: #cfdfdb;
   cursor: not-allowed;
-  opacity: 1;
+  opacity: 0.82;
 }
 
 .appointment-field-helper {
@@ -1658,18 +1664,18 @@ body{
   padding: 0.95rem 1.45rem;
   border: none;
   border-radius: 16px;
-  background: linear-gradient(135deg, #7c3aed 0%, #16a34a 100%);
+  background: #0f766e;
   color: #ffffff;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-  box-shadow: 0 14px 28px rgba(76, 29, 149, 0.18);
+  box-shadow: 0 12px 24px rgba(15, 118, 110, 0.22);
 }
 
 .appointment-form button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 18px 32px rgba(76, 29, 149, 0.22);
+  box-shadow: 0 16px 28px rgba(15, 118, 110, 0.28);
 }
 
 .appointment-form-error {
@@ -4586,11 +4592,11 @@ body{
   .appointment-form-card-patient {
     width: min(100%, 460px);
     margin: 0 auto;
-    padding: 1rem 0.9rem;
-    border-radius: 26px;
-    background: linear-gradient(180deg, rgba(250, 245, 255, 0.94) 0%, rgba(243, 236, 255, 0.92) 100%);
-    border: 1px solid rgba(168, 85, 247, 0.18);
-    box-shadow: 0 20px 40px rgba(111, 52, 165, 0.12);
+    padding: 1.4rem 1.25rem;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 118, 110, 0.16);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.1);
   }
 
   .appointment-form-card-patient .appointment-form-title {
@@ -4600,7 +4606,7 @@ body{
     max-width: 22rem;
     margin-left: auto;
     margin-right: auto;
-    color: #4c1d95;
+    color: #0f766e;
   }
 
   .appointment-form-card-patient .appointment-form-mobile-note {
@@ -4624,8 +4630,7 @@ body{
     gap: 0.8rem;
   }
 
-  .appointment-form-card-patient .appointment-field-full,
-  .appointment-form-card-patient .appointment-field:not(.appointment-field-compact) {
+  .appointment-form-card-patient .appointment-field-full {
     grid-column: 1 / -1;
   }
 
@@ -4635,8 +4640,8 @@ body{
     overflow: hidden;
     padding: 0.75rem;
     border-radius: 16px;
-    background: linear-gradient(180deg, rgba(248, 245, 255, 0.95) 0%, rgba(236, 232, 255, 0.95) 100%);
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    background: #f0fdfa;
+    border: 1px solid rgba(15, 118, 110, 0.16);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
   }
 
@@ -4645,7 +4650,7 @@ body{
     font-size: 0.82rem;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    color: #5b21b6;
+    color: #134e4a;
   }
 
   .appointment-form-card-patient .appointment-field input,
@@ -4655,8 +4660,8 @@ body{
     min-height: 50px;
     padding: 0.85rem 0.9rem;
     border-radius: 14px;
-    border-color: rgba(168, 85, 247, 0.22);
-    background: #f8f5ff;
+    border-color: rgba(15, 118, 110, 0.24);
+    background: #ffffff;
     font-size: 16px;
   }
 
@@ -4689,18 +4694,18 @@ body{
   .appointment-form-card-patient .appointment-option-card {
     width: 100%;
     padding: 0.9rem 0.85rem;
-    border: 1px solid rgba(168, 85, 247, 0.24);
+    border: 1px solid rgba(15, 118, 110, 0.2);
     border-radius: 16px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 245, 255, 0.96) 100%);
+    background: #ffffff;
     color: #0f172a;
     text-align: left;
-    box-shadow: 0 8px 18px rgba(111, 52, 165, 0.06);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
   }
 
   .appointment-form-card-patient .appointment-option-card.is-selected {
-    border-color: rgba(168, 85, 247, 0.42);
-    background: linear-gradient(180deg, rgba(236, 232, 255, 0.95) 0%, rgba(221, 214, 255, 0.95) 100%);
-    box-shadow: 0 12px 20px rgba(111, 52, 165, 0.12);
+    border-color: rgba(13, 148, 136, 0.48);
+    background: #ccfbf1;
+    box-shadow: 0 12px 20px rgba(15, 118, 110, 0.12);
   }
 
   .appointment-form-card-patient .appointment-option-title {
@@ -4734,7 +4739,7 @@ body{
     position: sticky;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 0.25rem);
     padding: 0.9rem 0 0.2rem;
-    border-top: 1px solid rgba(168, 85, 247, 0.16);
+    border-top: 1px solid rgba(15, 118, 110, 0.16);
     backdrop-filter: blur(10px);
   }
 
@@ -4876,7 +4881,7 @@ body{
 
   .appointment-form-card-patient {
     width: min(100%, 360px);
-    padding: 0.85rem 0.7rem;
+    padding: 1.1rem 0.9rem;
     border-radius: 18px;
   }
 

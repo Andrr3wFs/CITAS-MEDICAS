@@ -196,7 +196,7 @@ export default function AppointmentForm({
         )}
         <form className="appointment-form" onSubmit={handleSubmit}>
           <div className="appointment-form-grid">
-            <div className="appointment-field appointment-field-full">
+            <div className="appointment-field appointment-field-full appointment-field-symptoms">
               <label>
                 <span className="appointment-field-label-content">
                   {isPatientForm && <span className="appointment-field-icon" aria-hidden="true">⚕</span>}
@@ -263,7 +263,7 @@ export default function AppointmentForm({
               </p>
             </div>
 
-            <div className="appointment-field">
+            <div className="appointment-field appointment-field-specialty">
               <label>
                 <span className="appointment-field-label-content">
                   {isPatientForm && <span className="appointment-field-icon" aria-hidden="true">🩺</span>}
@@ -291,7 +291,7 @@ export default function AppointmentForm({
               </select>
             </div>
 
-            <div className="appointment-field">
+            <div className="appointment-field appointment-field-doctor">
               <label>
                 <span className="appointment-field-label-content">
                   {isPatientForm && <span className="appointment-field-icon" aria-hidden="true">👨‍⚕️</span>}
