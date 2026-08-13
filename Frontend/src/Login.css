@@ -5994,7 +5994,7 @@ body{
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  min-height: 44px;
+  min-height: 48px;
   padding: 0.65rem 0.9rem;
   border: 1px solid rgba(202, 250, 255, 0.58);
   border-radius: 8px;
@@ -6007,12 +6007,14 @@ body{
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, transform 0.2s ease;
 }
 
 .auth-login-launcher:hover {
   border-color: #8ff7f0;
   background: rgba(7, 115, 145, 0.82);
+  box-shadow: 0 14px 32px rgba(0, 10, 24, 0.4), 0 0 0 4px rgba(143, 247, 240, 0.16), 0 0 22px rgba(101, 240, 248, 0.45);
+  filter: brightness(1.12);
   transform: translateY(-2px);
 }
 
@@ -6032,7 +6034,9 @@ body{
 }
 
 .auth-login-launcher-open:hover {
-  transform: translateX(-50%) translateY(-2px);
+  background: linear-gradient(100deg, #11d2d5, #339df5);
+  box-shadow: 0 18px 38px rgba(0, 10, 24, 0.46), 0 0 0 6px rgba(143, 247, 240, 0.2), 0 0 28px rgba(101, 240, 248, 0.58);
+  transform: translateX(-50%) translateY(-2px) scale(1.02);
 }
 
 .auth-login-launcher-close {
@@ -6113,6 +6117,13 @@ body{
   justify-items: center;
   width: min(calc(100% - 2rem), 32rem);
   margin: 0;
+  padding: clamp(1rem, 3vw, 1.75rem) clamp(1.15rem, 4vw, 2.25rem);
+  border: 1px solid rgba(218, 253, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(3, 24, 42, 0.45);
+  box-shadow: 0 18px 48px rgba(0, 8, 21, 0.34), inset 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   color: #effeff;
   text-align: center;
   transform: translate(-50%, -56%);
@@ -6149,13 +6160,17 @@ body{
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 800;
   line-height: 1;
+  text-shadow: 0 3px 14px rgba(0, 8, 20, 0.82);
 }
 
 .auth-entry-intro p:last-child {
   max-width: 38ch;
   margin: 1rem 0 0;
-  color: rgba(232, 254, 255, 0.85);
-  font-size: 1rem;
+  color: rgba(244, 255, 255, 0.96);
+  font-size: clamp(1.05rem, 1.5vw, 1.18rem);
+  font-weight: 600;
+  line-height: 1.55;
+  text-shadow: 0 2px 10px rgba(0, 8, 20, 0.88);
 }
 
 .auth-shell-login {
@@ -6860,7 +6875,7 @@ body{
     align-items: center;
     width: min(100%, 340px);
     max-width: calc(100vw - 2rem);
-    padding: 0;
+    padding: 1rem;
     transform: none;
   }
 
@@ -6872,6 +6887,7 @@ body{
   .auth-entry-intro p:last-child {
     width: min(100%, 30ch);
     max-width: 100%;
+    font-size: 1rem;
     text-align: center;
   }
 
@@ -6885,6 +6901,7 @@ body{
     width: min(85%, 320px);
     max-width: calc(100vw - 2rem);
     min-width: 0;
+    min-height: 52px;
     margin: 1.5rem auto 0;
     transform: none !important;
   }
@@ -6898,6 +6915,7 @@ body{
     flex: 0 0 auto;
     width: min(85%, 320px);
     max-width: calc(100vw - 2rem);
+    min-height: 48px;
     margin: 0.75rem auto 0;
   }
 
