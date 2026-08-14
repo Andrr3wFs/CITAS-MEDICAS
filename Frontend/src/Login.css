@@ -1559,6 +1559,11 @@ body{
   border: 1px solid rgba(15, 118, 110, 0.16);
 }
 
+.appointment-form-card-admin {
+  width: min(100%, 820px);
+  border-color: rgba(14, 116, 144, 0.2);
+}
+
 .appointment-form-title {
   text-align: center;
   margin: 0 0 1.25rem;
@@ -1569,6 +1574,13 @@ body{
 
 .appointment-form-mobile-note {
   display: none;
+}
+
+.appointment-form-card-admin .appointment-form-mobile-note {
+  display: block;
+  margin: -0.65rem 0 1.35rem;
+  color: #475569;
+  text-align: center;
 }
 
 .appointment-form {
@@ -1615,6 +1627,19 @@ body{
   align-items: center;
   justify-content: center;
   width: 1.2rem;
+  height: 1.2rem;
+  color: #0f766e;
+}
+
+.appointment-field-status {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(14, 116, 144, 0.2);
+  border-radius: 14px;
+  background: #f0f9ff;
+}
+
+.appointment-field-status select {
+  background: #ffffff;
 }
 
 .appointment-field input,

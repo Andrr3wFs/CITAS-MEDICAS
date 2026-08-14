@@ -3,6 +3,7 @@ import FullCalendar from "@fullcalendar/react";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import esLocale from "@fullcalendar/core/locales/es";
+import { CalendarDays, Clock3, HeartPulse, ShieldCheck, Stethoscope, UserRound } from "lucide-react";
 import { doctorsList, findDoctorByName, specialtiesList } from "./doctorDirectory";
 import {
   APPOINTMENT_DURATION_MINUTES,
@@ -57,6 +58,7 @@ export default function AppointmentForm({
 
   const { symptom, date, time, doctor, doctorUsername, specialty, status } = formValues;
   const isPatientForm = !isAdmin;
+  const formVariant = isAdmin ? "admin" : "patient";
   const selectedDoctor = useMemo(
     () => findDoctorByName(doctor) || doctorsList.find((doctorOption) => doctorOption.username === doctorUsername),
     [doctor, doctorUsername]
@@ -187,11 +189,13 @@ export default function AppointmentForm({
 
   return (
     <div className="appointment-form-container">
-      <div className={`appointment-form-card ${isPatientForm ? "appointment-form-card-patient" : ""}`}>
+      <div className={`appointment-form-card appointment-form-card-${formVariant}`}>
         <h2 className="appointment-form-title">{title}</h2>
-        {isPatientForm && (
+        {(isPatientForm || isAdmin) && (
           <p className="appointment-form-mobile-note">
-            Selecciona sintomas, fecha y doctor en unos pocos pasos.
+            {isAdmin
+              ? "Actualiza la atención y confirma el estado de la cita."
+              : "Selecciona sintomas, fecha y doctor en unos pocos pasos."}
           </p>
         )}
         <form className="appointment-form" onSubmit={handleSubmit}>
@@ -199,7 +203,7 @@ export default function AppointmentForm({
             <div className="appointment-field appointment-field-full appointment-field-symptoms">
               <label>
                 <span className="appointment-field-label-content">
-                  {isPatientForm && <span className="appointment-field-icon" aria-hidden="true">⚕</span>}
+                  <HeartPulse className="appointment-field-icon" aria-hidden="true" />
                   <span>Síntomas:</span>
                 </span>
               </label>
@@ -218,7 +222,7 @@ export default function AppointmentForm({
             <div className="appointment-field appointment-field-compact appointment-field-date">
               <label>
                 <span className="appointment-field-label-content">
-                  {isPatientForm && <span className="appointment-field-icon" aria-hidden="true">📅</span>}
+                  <CalendarDays className="appointment-field-icon" aria-hidden="true" />
                   <span>Fecha:</span>
                 </span>
               </label>
@@ -233,7 +237,7 @@ export default function AppointmentForm({
             <div className="appointment-field appointment-field-compact appointment-field-time">
               <label>
                 <span className="appointment-field-label-content">
-                  {isPatientForm && <span className="appointment-field-icon" aria-hidden="true">🕒</span>}
+                  <Clock3 className="appointment-field-icon" aria-hidden="true" />
                   <span>Hora:</span>
                 </span>
               </label>
@@ -266,7 +270,7 @@ export default function AppointmentForm({
             <div className="appointment-field appointment-field-specialty">
               <label>
                 <span className="appointment-field-label-content">
-                  {isPatientForm && <span className="appointment-field-icon" aria-hidden="true">🩺</span>}
+                  <Stethoscope className="appointment-field-icon" aria-hidden="true" />
                   <span>Especialidad:</span>
                 </span>
               </label>
@@ -294,7 +298,7 @@ export default function AppointmentForm({
             <div className="appointment-field appointment-field-doctor">
               <label>
                 <span className="appointment-field-label-content">
-                  {isPatientForm && <span className="appointment-field-icon" aria-hidden="true">👨‍⚕️</span>}
+                  <UserRound className="appointment-field-icon" aria-hidden="true" />
                   <span>Doctor:</span>
                 </span>
               </label>
@@ -330,8 +334,13 @@ export default function AppointmentForm({
             </div>
 
             {isAdmin && (
-              <div className="appointment-field">
-                <label>Estado:</label>
+              <div className="appointment-field appointment-field-status">
+                <label>
+                  <span className="appointment-field-label-content">
+                    <ShieldCheck className="appointment-field-icon" aria-hidden="true" />
+                    <span>Estado de la cita:</span>
+                  </span>
+                </label>
                 <select
                   value={status}
                   onChange={e => updateField("status", e.target.value)}
