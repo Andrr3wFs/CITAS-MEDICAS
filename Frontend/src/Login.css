@@ -6300,6 +6300,8 @@ body{
 }
 
 .clinical-ecg svg {
+  position: relative;
+  z-index: 2;
   display: block;
   width: 100%;
   height: 100%;
@@ -6307,16 +6309,16 @@ body{
 
 .clinical-ecg path {
   fill: none;
-  stroke: #ff2a2a;
-  stroke-width: 2.5;
-  filter: drop-shadow(0 0 10px #ff0033) drop-shadow(0 0 22px rgba(255, 0, 51, 0.8));
+  stroke: #ff1f2d;
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 8px #ff0033) drop-shadow(0 0 18px rgba(255, 0, 51, 0.95));
 }
 
-.clinical-ecg-trace { opacity: 0.22; }
+.clinical-ecg-trace { opacity: 0.46; }
 
 .clinical-ecg-trail {
   stroke: #ff0033;
-  stroke-width: 3.4px;
+  stroke-width: 4px;
   stroke-dasharray: 150 1050;
   stroke-dashoffset: 1200;
   filter: drop-shadow(0 0 10px #ff0033) drop-shadow(0 0 24px rgba(255, 0, 51, 0.9));
