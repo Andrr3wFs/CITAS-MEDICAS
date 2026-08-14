@@ -6291,7 +6291,7 @@ body{
   position: absolute;
   inset: 0;
   content: '';
-  background: linear-gradient(90deg, rgba(4, 15, 31, 0.95) 0%, transparent 16%, transparent 84%, rgba(4, 15, 31, 0.95) 100%);
+  background: linear-gradient(90deg, rgba(3, 14, 31, 0.92) 0%, rgba(5, 25, 51, 0.72) 18%, rgba(5, 25, 51, 0.64) 50%, rgba(5, 25, 51, 0.72) 82%, rgba(3, 14, 31, 0.92) 100%);
   z-index: 1;
 }
 
