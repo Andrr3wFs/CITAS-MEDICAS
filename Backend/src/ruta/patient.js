@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { appointments, users, accessRequests, saveData, normalizeUsername, hashPasswordSync } = require('../storage');
+const { appointments, users, accessRequests, saveData, normalizeUsername, hashPasswordSync, PASSWORD_POLICY_VERSION } = require('../storage');
 const { authenticate, getRequestUserRole, getRequestUsername } = require('../auth');
 const { getAvailabilityError } = require('../appointmentAvailability');
 const { auditMutation } = require('../middleware/audit');
+const { validatePassword } = require('../passwordPolicy');
 
 const sanitizeText = (value) => String(value || '').trim().replace(/[<>]/g, (match) => (match === '<' ? '&lt;' : '&gt;'));
 const patientAppointmentStatuses = ['solicitada', 'aprobada', 'rechazada', 'cancelada', 'pendiente', 'atendida'];
@@ -51,6 +52,15 @@ router.post('/registro', (req, res) => {
     return res.status(400).json({ success: false, message: 'usuario, password y nombre son obligatorios' });
   }
 
+  const passwordValidation = validatePassword(password, { username: usuario, displayName: nombre });
+  if (!passwordValidation.valid) {
+    return res.status(400).json({
+      success: false,
+      message: 'La contraseña no cumple la política de seguridad.',
+      passwordPolicyErrors: passwordValidation.errors,
+    });
+  }
+
   if (users.some((user) => user.usuario === usuario) || accessRequests.some((request) => request.usuario === usuario && request.status === 'pending')) {
     return res.status(409).json({ success: false, message: 'Ya existe una cuenta o solicitud pendiente con este usuario' });
   }
@@ -69,6 +79,7 @@ router.post('/registro', (req, res) => {
     status: 'pending',
     estadoAprobacion: 'pendiente_aprobacion',
     requestedAt: new Date().toISOString(),
+    passwordPolicyVersion: PASSWORD_POLICY_VERSION,
   };
 
   accessRequests.push(request);

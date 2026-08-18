@@ -4,8 +4,10 @@
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const { validatePassword } = require('./passwordPolicy');
 
 const HASHED_PASSWORD_REGEX = /^\$2[aby]\$.{56}$/;
+const PASSWORD_POLICY_VERSION = 1;
 
 const createEmptyClinicalHistory = () => ({
   medicalHistory: '',
@@ -16,7 +18,7 @@ const createEmptyClinicalHistory = () => ({
   followUp: '',
 });
 
-const dataFilePath = path.join(__dirname, 'data.json');
+const dataFilePath = process.env.HOSPITAL_DATA_FILE || path.join(__dirname, 'data.json');
 
 const defaultAppointments = [];
 const defaultPushSubscriptions = [];
@@ -28,13 +30,28 @@ const defaultBeds = [
   { id: 4, name: 'C-202', room: 'Pabellón B', type: 'maternidad', status: 'ocupada' },
 ];
 
-const defaultUsers = [
-  { usuario: 'admin', password: '1234', role: 'admin', nombre: 'Admin' },
-  { usuario: 'doctor1', password: '1234', role: 'doctor', nombre: 'Dr. García' },
-  { usuario: 'doctor2', password: '1234', role: 'doctor', nombre: 'Dra. Martínez' },
-  { usuario: 'doctor3', password: '1234', role: 'doctor', nombre: 'Dr. López' },
-  { usuario: 'doctor4', password: '1234', role: 'doctor', nombre: 'Dra. Fernández' },
-];
+const getBootstrapUsers = () => {
+  const password = String(process.env.BOOTSTRAP_ADMIN_PASSWORD || '');
+  const username = process.env.BOOTSTRAP_ADMIN_USERNAME || 'admin';
+  const displayName = process.env.BOOTSTRAP_ADMIN_NAME || 'Administrador inicial';
+
+  if (!password) {
+    return [];
+  }
+
+  const validation = validatePassword(password, { username, displayName });
+  if (!validation.valid) {
+    throw new Error(`BOOTSTRAP_ADMIN_PASSWORD no cumple la política: ${validation.errors.join(' ')}`);
+  }
+
+  return [{
+    usuario: username,
+    password,
+    role: 'admin',
+    nombre: displayName,
+    passwordPolicyVersion: PASSWORD_POLICY_VERSION,
+  }];
+};
 
 const normalizeText = (value) =>
   String(value || '').trim().replace(/[<>]/g, (match) => (match === '<' ? '&lt;' : '&gt;'));
@@ -47,6 +64,7 @@ const isPasswordHashed = (value) => HASHED_PASSWORD_REGEX.test(String(value || '
 const normalizeUser = (user = {}) => {
   const normalizedUsuario = normalizeUsername(user?.usuario);
   const rawPassword = String(user?.password || '');
+  const parsedSessionVersion = Number(user?.sessionVersion);
 
   return {
     role: 'paciente',
@@ -55,6 +73,9 @@ const normalizeUser = (user = {}) => {
     ...(user?.role === 'paciente' && !user?.estadoAprobacion ? { estadoAprobacion: 'aprobado' } : {}),
     usuario: normalizedUsuario,
     password: isPasswordHashed(rawPassword) ? rawPassword : hashPasswordSync(rawPassword),
+    mfaEnabled: user?.mfaEnabled === true,
+    passwordChangeRequired: user?.passwordChangeRequired === true,
+    sessionVersion: Number.isInteger(parsedSessionVersion) && parsedSessionVersion > 0 ? parsedSessionVersion : 1,
   };
 };
 
@@ -147,6 +168,45 @@ const normalizeIntegrationConfig = (integrationConfig = {}) => ({
   labEndpoint: String(integrationConfig?.labEndpoint || '').trim(),
 });
 
+const normalizeSession = (session = {}) => {
+  const id = String(session?.id || '').trim();
+  const username = normalizeUsername(session?.username);
+  const expiresAt = String(session?.expiresAt || '').trim();
+
+  if (!id || !username || !Number.isFinite(Date.parse(expiresAt))) {
+    return null;
+  }
+
+  return {
+    ...session,
+    id,
+    username,
+    expiresAt,
+    issuedAt: String(session?.issuedAt || new Date().toISOString()),
+    lastActivityAt: String(session?.lastActivityAt || session?.issuedAt || new Date().toISOString()),
+  };
+};
+
+const normalizeAuthChallenge = (challenge = {}) => {
+  const id = String(challenge?.id || '').trim();
+  const username = normalizeUsername(challenge?.username);
+  const purpose = String(challenge?.purpose || '').trim();
+  const expiresAt = String(challenge?.expiresAt || '').trim();
+
+  if (!id || !username || !purpose || !Number.isFinite(Date.parse(expiresAt))) {
+    return null;
+  }
+
+  return {
+    ...challenge,
+    id,
+    username,
+    purpose,
+    expiresAt,
+    attempts: Number.isInteger(Number(challenge?.attempts)) ? Number(challenge.attempts) : 0,
+  };
+};
+
 const normalizeAppointments = (appointments = []) => {
   const usedIds = new Set();
   let nextGeneratedId = 1;
@@ -177,13 +237,16 @@ const normalizeAppointments = (appointments = []) => {
 
 const buildDefaultData = () => ({
   appointments: normalizeAppointments(defaultAppointments),
-  users: defaultUsers.map(normalizeUser),
+  users: getBootstrapUsers().map(normalizeUser),
   pushSubscriptions: normalizePushSubscriptions(defaultPushSubscriptions),
   notificationConfig: normalizeNotificationConfig(),
   accessRequests: [],
   admissions: defaultAdmissions,
   beds: defaultBeds,
   auditLogs: [],
+  sessions: [],
+  authChallenges: [],
+  integrationConfig: normalizeIntegrationConfig(),
 });
 
 const writeDataFile = (data) => {
@@ -205,7 +268,20 @@ const loadData = () => {
     const users = Array.isArray(parsedData.users)
       ? parsedData.users.map((user) => {
           const normalized = normalizeUser(user);
-          if (!isPasswordHashed(String(user?.password || '')) || (user?.role === 'paciente' && !user?.estadoAprobacion)) {
+          const requiresPasswordChange = normalized.passwordChangeRequired
+            || Number(user?.passwordPolicyVersion) !== PASSWORD_POLICY_VERSION;
+
+          if (requiresPasswordChange) {
+            normalized.passwordChangeRequired = true;
+          }
+
+          if (
+            !isPasswordHashed(String(user?.password || ''))
+            || (user?.role === 'paciente' && !user?.estadoAprobacion)
+            || normalized.passwordChangeRequired !== (user?.passwordChangeRequired === true)
+            || normalized.sessionVersion !== Number(user?.sessionVersion || 1)
+            || normalized.mfaEnabled !== (user?.mfaEnabled === true)
+          ) {
             hasUpdates = true;
           }
           return normalized;
@@ -222,6 +298,22 @@ const loadData = () => {
         })
       : buildDefaultData().accessRequests;
 
+    const sessions = Array.isArray(parsedData.sessions)
+      ? parsedData.sessions
+          .map(normalizeSession)
+          .filter((session) => session && !session.revokedAt && Date.parse(session.expiresAt) > Date.now())
+      : [];
+
+    const authChallenges = Array.isArray(parsedData.authChallenges)
+      ? parsedData.authChallenges
+          .map(normalizeAuthChallenge)
+          .filter((challenge) => challenge && !challenge.consumedAt && Date.parse(challenge.expiresAt) > Date.now())
+      : [];
+
+    if (!Array.isArray(parsedData.sessions) || !Array.isArray(parsedData.authChallenges)) {
+      hasUpdates = true;
+    }
+
     const storedData = {
       appointments: Array.isArray(parsedData.appointments)
         ? normalizeAppointments(parsedData.appointments)
@@ -235,6 +327,8 @@ const loadData = () => {
       admissions: Array.isArray(parsedData.admissions) ? parsedData.admissions : buildDefaultData().admissions,
       beds: Array.isArray(parsedData.beds) ? parsedData.beds : buildDefaultData().beds,
       auditLogs: Array.isArray(parsedData.auditLogs) ? parsedData.auditLogs : [],
+      sessions,
+      authChallenges,
       integrationConfig: normalizeIntegrationConfig(parsedData.integrationConfig || {}),
     };
 
@@ -259,11 +353,42 @@ const accessRequests = storedData.accessRequests;
 const admissions = storedData.admissions;
 const beds = storedData.beds;
 const auditLogs = storedData.auditLogs;
+const sessions = storedData.sessions;
+const authChallenges = storedData.authChallenges;
 const integrationConfig = storedData.integrationConfig || { labEndpoint: '' };
 
 const saveData = () => {
-  writeDataFile({ appointments, users, pushSubscriptions, notificationConfig, accessRequests, admissions, beds, auditLogs, integrationConfig });
+  writeDataFile({
+    appointments,
+    users,
+    pushSubscriptions,
+    notificationConfig,
+    accessRequests,
+    admissions,
+    beds,
+    auditLogs,
+    sessions,
+    authChallenges,
+    integrationConfig,
+  });
 };
 
-module.exports = { appointments, users, pushSubscriptions, notificationConfig, accessRequests, admissions, beds, auditLogs, integrationConfig, saveData, normalizeUsername, isPasswordHashed, hashPasswordSync };
+module.exports = {
+  appointments,
+  users,
+  pushSubscriptions,
+  notificationConfig,
+  accessRequests,
+  admissions,
+  beds,
+  auditLogs,
+  sessions,
+  authChallenges,
+  integrationConfig,
+  PASSWORD_POLICY_VERSION,
+  saveData,
+  normalizeUsername,
+  isPasswordHashed,
+  hashPasswordSync,
+};
 

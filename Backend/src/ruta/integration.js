@@ -1,19 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { integrationConfig } = require('../storage');
-const { authenticate, getRequestUserRole, getRequestUsername } = require('../auth');
-
-console.log('[integration] module loaded');
+const { appointments, integrationConfig } = require('../storage');
+const { authenticate, getRequestUserRole, getRequestUsername, normalizeUsername } = require('../auth');
 
 router.use(authenticate);
 
 const canIntegrate = (req) => ['admin', 'secretaria', 'doctor'].includes(getRequestUserRole(req));
+const isDoctorAssignedToOrder = (req, appointment, patientId) => (
+  getRequestUserRole(req) !== 'doctor'
+    || (
+      appointment?.doctorUsername === getRequestUsername(req)
+      && appointment.patientId === normalizeUsername(patientId)
+    )
+);
 
 // Create and forward a lab order using a FHIR-like ServiceRequest payload
 router.post('/orders/lab', async (req, res) => {
-  console.log('[integration] POST /orders/lab called by', getRequestUsername(req), 'role', getRequestUserRole(req));
-  console.log('[integration] body', req.body);
   if (!canIntegrate(req)) {
     return res.status(403).json({ success: false, message: 'No tienes permisos para crear ordenes' });
   }
@@ -22,6 +25,18 @@ router.post('/orders/lab', async (req, res) => {
 
   if (!patientId || !orderCode) {
     return res.status(400).json({ success: false, message: 'patientId y orderCode son obligatorios' });
+  }
+
+  const appointment = appointmentId
+    ? appointments.find((entry) => String(entry.id) === String(appointmentId))
+    : null;
+
+  if (getRequestUserRole(req) === 'doctor' && !appointmentId) {
+    return res.status(400).json({ success: false, message: 'Los médicos deben indicar la cita asignada para crear una orden.' });
+  }
+
+  if (!isDoctorAssignedToOrder(req, appointment, patientId)) {
+    return res.status(403).json({ success: false, message: 'Solo puedes crear órdenes para pacientes de citas asignadas.' });
   }
 
   const serviceRequest = {

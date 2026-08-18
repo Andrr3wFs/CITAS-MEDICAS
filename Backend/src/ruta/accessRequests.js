@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { users, accessRequests, saveData, normalizeUsername, hashPasswordSync, isPasswordHashed } = require('../storage');
+const { users, accessRequests, saveData, normalizeUsername, hashPasswordSync, isPasswordHashed, PASSWORD_POLICY_VERSION } = require('../storage');
 const { authenticate, getRequestUserRole } = require('../auth');
 const { 
   sendNewAccessRequestNotification,
@@ -54,7 +54,7 @@ router.get('/stats', isAdmin, (req, res) => {
 // Approve an access request
 router.post('/approve', isAdmin, async (req, res) => {
   const requestId = req.body?.requestId;
-  const adminUsername = req.body?.adminUsername;
+  const adminUsername = req.user.username;
 
   if (!requestId) {
     return res.status(400).json({ success: false, message: 'ID de solicitud requerido' });
@@ -82,7 +82,11 @@ router.post('/approve', isAdmin, async (req, res) => {
     accessClosed: true,
     registrationAvailableAt,
     approvedAt: new Date().toISOString(),
-    approvedBy: adminUsername
+    approvedBy: adminUsername,
+    passwordPolicyVersion: request.passwordPolicyVersion === PASSWORD_POLICY_VERSION ? PASSWORD_POLICY_VERSION : 0,
+    passwordChangeRequired: request.passwordPolicyVersion !== PASSWORD_POLICY_VERSION,
+    sessionVersion: 1,
+    mfaEnabled: false,
   });
 
   // Update request status
@@ -117,7 +121,7 @@ router.post('/approve', isAdmin, async (req, res) => {
 router.post('/reject', isAdmin, async (req, res) => {
   const requestId = req.body?.requestId;
   const reason = req.body?.reason || 'No especificado';
-  const adminUsername = req.body?.adminUsername;
+  const adminUsername = req.user.username;
 
   if (!requestId) {
     return res.status(400).json({ success: false, message: 'ID de solicitud requerido' });

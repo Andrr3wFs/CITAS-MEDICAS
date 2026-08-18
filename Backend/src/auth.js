@@ -1,8 +1,13 @@
 const jwt = require('jsonwebtoken');
+const {
+  getActiveSession,
+  getCurrentUser,
+  getJwtSecret,
+  isPrivilegedRole,
+  recordSessionActivity,
+} = require('./authSessions');
 
 const normalizeUsername = (username) => String(username || '').trim().toLowerCase();
-
-const getJwtSecret = () => process.env.JWT_SECRET || 'hospital-secret-key';
 
 const authenticate = (req, res, next) => {
   const authHeader = String(req.headers.authorization || '');
@@ -14,11 +19,30 @@ const authenticate = (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, getJwtSecret());
+    const username = normalizeUsername(payload.username);
+    const user = getCurrentUser(username);
+    const session = getActiveSession({
+      sessionId: payload.sid,
+      username,
+      sessionVersion: payload.sv,
+    });
+
+    if (!user || !session || user.sessionVersion !== Number(payload.sv) || user.passwordChangeRequired) {
+      return res.status(401).json({ success: false, message: 'La sesión no está activa. Inicia sesión nuevamente.' });
+    }
+
+    const role = String(user.role || 'paciente').trim().toLowerCase();
+    if (isPrivilegedRole(role) && (!user.mfaEnabled || !session.mfaVerifiedAt)) {
+      return res.status(401).json({ success: false, message: 'La sesión no cumple el requisito de MFA.' });
+    }
+
     req.user = {
-      username: normalizeUsername(payload.username),
-      role: String(payload.role || 'paciente').trim().toLowerCase(),
-      displayName: String(payload.displayName || payload.username || '').trim(),
+      username,
+      role,
+      displayName: String(user.nombre || user.usuario).trim(),
+      sessionId: session.id,
     };
+    recordSessionActivity(session);
     return next();
   } catch (error) {
     return res.status(401).json({ success: false, message: 'Token inválido o expirado' });
@@ -26,19 +50,11 @@ const authenticate = (req, res, next) => {
 };
 
 const getRequestUserRole = (req) => {
-  if (req.user?.role) {
-    return req.user.role;
-  }
-
-  return String(req.headers['x-user-role'] || '').trim().toLowerCase();
+  return req.user?.role || '';
 };
 
 const getRequestUsername = (req) => {
-  if (req.user?.username) {
-    return req.user.username;
-  }
-
-  return normalizeUsername(req.headers['x-user-username'] || req.headers['x-username']);
+  return req.user?.username || '';
 };
 
 module.exports = {

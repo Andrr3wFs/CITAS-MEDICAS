@@ -68,12 +68,15 @@ const upsertPushSubscription = ({ username, role, displayName, subscription }) =
   return nextRecord;
 };
 
-const removePushSubscriptionByEndpoint = (endpoint) => {
+const removePushSubscriptionByEndpoint = (endpoint, username) => {
   const subscriptionIndex = pushSubscriptions.findIndex(
     (entry) => entry?.subscription?.endpoint === endpoint
   );
 
-  if (subscriptionIndex === -1) {
+  if (
+    subscriptionIndex === -1
+    || (username && pushSubscriptions[subscriptionIndex].username !== normalizeUsername(username))
+  ) {
     return false;
   }
 

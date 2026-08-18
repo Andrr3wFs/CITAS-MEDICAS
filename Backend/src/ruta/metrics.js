@@ -1,6 +1,6 @@
 const express = require('express');
 const { appointments } = require('../storage');
-const { authenticate, getRequestUserRole } = require('../auth');
+const { authenticate, getRequestUserRole, getRequestUsername } = require('../auth');
 
 const router = express.Router();
 
@@ -22,18 +22,21 @@ router.get('/metrics/appointments', (req, res) => {
   const cutoff = new Date(now);
   cutoff.setDate(now.getDate() - 6);
   cutoff.setHours(0, 0, 0, 0);
-  const rangeAppointments = appointments.filter((appointment) => {
+  const doctorAppointments = appointments.filter((appointment) => (
+    appointment.doctorUsername === getRequestUsername(req)
+  ));
+  const rangeAppointments = doctorAppointments.filter((appointment) => {
     const date = getAppointmentDate(appointment);
     return date && date >= cutoff && date <= now;
   });
 
-  const attended = appointments.filter((appointment) => appointment.estado === 'atendida').length;
-  const noShow = appointments.filter((appointment) => appointment.estado === 'no_asistencia').length;
-  const cancelled = appointments.filter((appointment) => appointment.estado === 'cancelada').length;
+  const attended = doctorAppointments.filter((appointment) => appointment.estado === 'atendida').length;
+  const noShow = doctorAppointments.filter((appointment) => appointment.estado === 'no_asistencia').length;
+  const cancelled = doctorAppointments.filter((appointment) => appointment.estado === 'cancelada').length;
   const completedOrMissed = attended + noShow;
   const specialties = new Map();
 
-  appointments.forEach((appointment) => {
+  doctorAppointments.forEach((appointment) => {
     const specialty = String(appointment.especialidad || appointment.doctor || 'Sin especialidad').trim();
     specialties.set(specialty, (specialties.get(specialty) || 0) + 1);
   });
@@ -55,7 +58,7 @@ router.get('/metrics/appointments', (req, res) => {
     success: true,
     noShowRate: completedOrMissed ? Number(((noShow / completedOrMissed) * 100).toFixed(1)) : 0,
     noShow,
-    approved: appointments.filter((appointment) => appointment.estado === 'aprobada').length,
+    approved: doctorAppointments.filter((appointment) => appointment.estado === 'aprobada').length,
     attended,
     cancelled,
     demandBySpecialty: Array.from(specialties, ([name, value]) => ({ name, value }))

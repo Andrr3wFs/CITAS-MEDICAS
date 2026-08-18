@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { appointments, users, accessRequests, saveData, isPasswordHashed, hashPasswordSync } = require('../storage');
+const { appointments, users, accessRequests, saveData, isPasswordHashed, hashPasswordSync, PASSWORD_POLICY_VERSION } = require('../storage');
 const { authenticate, getRequestUserRole } = require('../auth');
 const { getAvailabilityError } = require('../appointmentAvailability');
 const { auditMutation } = require('../middleware/audit');
@@ -53,6 +53,10 @@ router.put('/pacientes/:id/aprobar', auditMutation({
     estadoAprobacion: 'aprobado',
     approvedAt,
     approvedBy: req.user.username,
+    passwordPolicyVersion: request.passwordPolicyVersion === PASSWORD_POLICY_VERSION ? PASSWORD_POLICY_VERSION : 0,
+    passwordChangeRequired: request.passwordPolicyVersion !== PASSWORD_POLICY_VERSION,
+    sessionVersion: 1,
+    mfaEnabled: false,
   };
 
   if (users.some((user) => user.usuario === patient.usuario)) {

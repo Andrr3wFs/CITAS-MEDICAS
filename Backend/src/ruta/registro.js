@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { users, accessRequests, saveData, normalizeUsername, hashPasswordSync } = require('../storage');
+const { users, accessRequests, saveData, normalizeUsername, hashPasswordSync, PASSWORD_POLICY_VERSION } = require('../storage');
 const { sendNewAccessRequestNotification } = require('../emailService');
+const { validatePassword } = require('../passwordPolicy');
 
 // Get admin emails from users
 const getAdminEmails = () => {
@@ -9,32 +10,6 @@ const getAdminEmails = () => {
     .filter(u => u.role === 'admin')
     .map(u => u.email || u.usuario + '@hospital.local')
     .filter(email => email);
-};
-
-// List of usernames that should auto-approve (e.g., known doctors)
-// You can modify this based on your needs
-const AUTO_APPROVE_USERS = [
-  'doctor1', 'doctor2', 'doctor3', 'doctor4',
-  'dra.martinez', 'dr.garcia', 'dr.lopez', 'dra.fernandez'
-];
-
-// Patterns for auto-approval (regex)
-const AUTO_APPROVE_PATTERNS = [
-  /^dr\./i,          // Starts with Dr.
-  /^dra\./i,         // Starts with Dra.
-  /doctor\d+/i,      // doctor followed by numbers
-];
-
-const shouldAutoApprove = (username) => {
-  const normalized = normalizeUsername(username);
-  
-  // Check exact matches
-  if (AUTO_APPROVE_USERS.includes(normalized)) {
-    return true;
-  }
-  
-  // Check regex patterns
-  return AUTO_APPROVE_PATTERNS.some(pattern => pattern.test(normalized));
 };
 
 const getLatestProcessedRequest = (username) => accessRequests
@@ -51,6 +26,15 @@ router.post('/register', async (req, res) => {
 
   if (!normalizedUsername || !normalizedPassword) {
     return res.status(400).json({ success: false, message: 'Usuario y contraseña son obligatorios' });
+  }
+
+  const passwordValidation = validatePassword(normalizedPassword, { username: normalizedUsername });
+  if (!passwordValidation.valid) {
+    return res.status(400).json({
+      success: false,
+      message: 'La contraseña no cumple la política de seguridad.',
+      passwordPolicyErrors: passwordValidation.errors,
+    });
   }
 
   const latestProcessedRequest = getLatestProcessedRequest(normalizedUsername);
@@ -79,46 +63,7 @@ router.post('/register', async (req, res) => {
     return res.status(409).json({ success: false, message: 'Ya tienes una solicitud de acceso pendiente' });
   }
 
-  // Check if should auto-approve
-  const autoApprove = shouldAutoApprove(normalizedUsername);
-  
   const hashedPassword = hashPasswordSync(normalizedPassword);
-
-  if (autoApprove) {
-    // Directly create the user
-    users.push({
-      usuario: normalizedUsername,
-      email: normalizedUsername,
-      password: hashedPassword,
-      role: 'doctor',
-      nombre: normalizedUsername,
-      approvedAt: new Date().toISOString(),
-      approvedBy: 'system-auto-approval'
-    });
-
-    // Create approved request record
-    const newRequest = {
-      id: Date.now(),
-      usuario: normalizedUsername,
-      password: hashedPassword,
-      status: 'approved',
-      requestedAt: new Date().toISOString(),
-      approvedAt: new Date().toISOString(),
-      role: 'doctor',
-      nombre: normalizedUsername,
-      autoApproved: true
-    };
-
-    accessRequests.push(newRequest);
-    saveData();
-
-    return res.json({ 
-      success: true, 
-      message: 'Bienvenido. Tu acceso ha sido aprobado automáticamente.',
-      status: 'approved',
-      autoApproved: true
-    });
-  }
 
   // Create pending request for manual approval
   const newRequest = {
@@ -129,7 +74,8 @@ router.post('/register', async (req, res) => {
     status: 'pending',
     requestedAt: new Date().toISOString(),
     role: 'paciente',
-    nombre: normalizedUsername
+    nombre: normalizedUsername,
+    passwordPolicyVersion: PASSWORD_POLICY_VERSION,
   };
 
   accessRequests.push(newRequest);

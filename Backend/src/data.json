@@ -174,143 +174,206 @@
       "role": "admin",
       "nombre": "Admin",
       "usuario": "admin",
-      "password": "$2b$10$bcsuSyJkfo9GBHY.1w9bEOLS7qC1TP9c5lJK.kgpKzNTu0heQD5yq"
+      "password": "$2b$10$bcsuSyJkfo9GBHY.1w9bEOLS7qC1TP9c5lJK.kgpKzNTu0heQD5yq",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "doctor",
       "nombre": "Dr. García",
       "usuario": "doctor1",
-      "password": "$2b$10$ywFWLNlFXfVIL.X79KzmZOdU7D0cZP9eleJkDdeqz5lXqC.NvlOs."
+      "password": "$2b$10$ywFWLNlFXfVIL.X79KzmZOdU7D0cZP9eleJkDdeqz5lXqC.NvlOs.",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "doctor",
       "nombre": "Dra. Martínez",
       "usuario": "doctor2",
-      "password": "$2b$10$UCRZzMzdx88Sg8NwZrm7Ue98NPC47H8XG.gxBOClcUwRby1OPg472"
+      "password": "$2b$10$UCRZzMzdx88Sg8NwZrm7Ue98NPC47H8XG.gxBOClcUwRby1OPg472",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "doctor",
       "nombre": "Dr. López",
       "usuario": "doctor3",
-      "password": "$2b$10$mC7CYYsHZwMRry5x6HC5c.pA5m3tXsSv2YLy2cNtZp7zAp45Euh56"
+      "password": "$2b$10$mC7CYYsHZwMRry5x6HC5c.pA5m3tXsSv2YLy2cNtZp7zAp45Euh56",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "doctor",
       "nombre": "Dra. Fernández",
       "usuario": "doctor4",
-      "password": "$2b$10$J3rzRzPaDuthAlFBabvbCO35P8lyfnzwCcooH8wLajH002MzCzKo6"
+      "password": "$2b$10$J3rzRzPaDuthAlFBabvbCO35P8lyfnzwCcooH8wLajH002MzCzKo6",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "paciente1",
       "usuario": "paciente1",
       "password": "$2b$10$.gXhH69jsluTiMf05lPDN.1dsUlNrwrEV9qEum6qY9klX4sRiEdUq",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "diana sanchez leon",
       "usuario": "diana sanchez leon",
       "password": "$2b$10$yMbI6.sggapQB74idghInuJThsQJBW/y9RHbALQu36qdi2VMwayiy",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "erick",
       "usuario": "erick",
       "password": "$2b$10$6wW.weKMNB5yrb97kl8b2e7L0x.r/lbWeTAy3TxnGLCjn2VXl2s6S",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "salome",
       "usuario": "salome",
       "password": "$2b$10$6AQ70/.8Kw6lKKLHb3BzBeGEV2bKNT435JkstttWOL/0HEGx4dxAe",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "freycamargo",
       "usuario": "freycamargo",
       "password": "$2b$10$nWKPDUntSiiqnSOqmOY/me1I8YQkFK7A/2xbIbisRusS8x7HjdDoC",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "cristian",
       "usuario": "cristian",
       "password": "$2b$10$vK1h/AvwR71Nzl.mkkfMWum.71GWuqPexocZzCMDG1f5I7uImrabi",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "cristian123456789",
       "usuario": "cristian123456789",
       "password": "$2b$10$IIZiV2b/LdiUTkIqwSGUKOo7mnLTJ9LBk8qrMczUTgY963q0a4CK.",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "carls12",
       "usuario": "carls12",
       "password": "$2b$10$unlkKNXWl/e1DQRK7wwfpeMn7WMMAucJsL9nmxFmwoCqxVAD6Rg5u",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "andr3w",
       "usuario": "andr3w",
       "password": "$2b$10$P09SDjEKIkrLMa3qMcaZ4uTghnVeUnZqLljvACb8ub8eHOd96vDqi",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "andrew",
       "usuario": "andrew",
       "password": "$2b$10$cu0oKMpjU4nompitEn4N4Ovpt2B3.vANmSuh/cm9HMduSFnv07Wtu",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "copilottestuser",
       "usuario": "copilottestuser",
       "password": "$2b$10$4KOMS.cKNGSWyNUc2WzRbuQ4adORkCBVmjwINiE4QsSv/13iYRXDe",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "copilotproxyuser",
       "usuario": "copilotproxyuser",
       "password": "$2b$10$bNU4pu8YKPbzCg73LKoqmeLIzIvEHAqQ51sBN.UishorYGbAeZTlG",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "registroprueba1774823262",
       "usuario": "registroprueba1774823262",
       "password": "$2b$10$NhVETLd0.GzJZfO0ZgacMu5l2FiZvmCjEeardjGZ60rHzYd6pMI9.",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "felipev",
       "usuario": "felipev",
       "password": "$2b$10$P4aMy9jw8gAAls4CcA0TYOlw80UOKqbfpOqeAjH/UF7KeOFS3MeeO",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "juanz2",
       "usuario": "juanz2",
       "password": "$2b$10$4kn5yHRUkAxrqxrlYISel.YcMVX2o/DufBjTN.h3EwVcSJQF1XLfK",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     },
     {
       "role": "paciente",
       "nombre": "freycamargo2003",
       "usuario": "freycamargo2003",
       "password": "$2b$10$NDKz4AuI09PG6/E4rBrnFeRjTnXmGyDoMTpwGqVSe9/9UvsJTkgnO",
-      "estadoAprobacion": "aprobado"
+      "estadoAprobacion": "aprobado",
+      "mfaEnabled": false,
+      "passwordChangeRequired": true,
+      "sessionVersion": 1
     }
   ],
   "pushSubscriptions": [],
@@ -377,6 +440,8 @@
     }
   ],
   "auditLogs": [],
+  "sessions": [],
+  "authChallenges": [],
   "integrationConfig": {
     "labEndpoint": ""
   }
