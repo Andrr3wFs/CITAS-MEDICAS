@@ -76,9 +76,6 @@ export function usePushNotifications({ user, addToast }) {
 
     await api.post("/push/subscriptions", {
       subscription,
-      username: user.username,
-      role: user.role,
-      displayName: user.displayName,
     });
 
     setPushEnabled(true);
@@ -153,7 +150,7 @@ export function usePushNotifications({ user, addToast }) {
 
         setServiceWorkerRegistration(registration);
         await syncSubscriptionState(registration);
-      } catch (error) {
+      } catch {
         if (isMounted) {
           setPushEnabled(false);
         }

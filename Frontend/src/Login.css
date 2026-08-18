@@ -5962,6 +5962,32 @@ body{
   margin: 0.4rem auto 0;
 }
 
+.auth-mfa-qr {
+  display: block;
+  width: min(100%, 180px);
+  height: auto;
+  margin: 0 auto 1rem;
+  padding: 0.45rem;
+  border: 1px solid #cbdde0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.auth-mfa-manual-key {
+  margin: 0 0 1rem;
+  color: #4b6370;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.auth-mfa-manual-key code {
+  color: #164e63;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 /* Modern clinical portal login */
 .login-wrapper.system-on {
   position: relative;
@@ -6070,10 +6096,10 @@ body{
 }
 
 .auth-login-launcher-close {
-  top: clamp(1rem, 3vw, 2.5rem);
-  right: clamp(1rem, 3vw, 2.5rem);
-  bottom: auto;
-  left: auto;
+  top: auto;
+  right: auto;
+  bottom: clamp(1rem, 3vw, 2.5rem);
+  left: clamp(1rem, 3vw, 2.5rem);
 }
 
 .auth-whatsapp-demo {
@@ -6762,6 +6788,7 @@ body{
 
 @media (max-width: 540px) {
   .auth-login-launcher { left: 1rem; bottom: 1rem; }
+  .auth-login-launcher-close { top: max(1rem, env(safe-area-inset-top)); right: 1rem; bottom: auto; left: auto; }
   .auth-overlay-slider { height: min(760px, calc(100vh - 2rem)); min-height: 580px; }
   .auth-overlay-slider .auth-login-brand { position: relative; width: auto; height: 230px; transform: none; }
   .auth-overlay-slider.right-panel-active .auth-login-brand { transform: none; }
@@ -6816,10 +6843,10 @@ body{
   }
 
   .auth-login-launcher-close {
-    top: max(1rem, env(safe-area-inset-top));
-    right: 1rem;
-    left: auto;
-    bottom: auto;
+    top: auto;
+    right: auto;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    left: 1rem;
   }
 
   .auth-shell-login,

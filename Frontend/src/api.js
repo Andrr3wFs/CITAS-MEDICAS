@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
-  'https://elegant-quietude-production-c1c5.up.railway.app/api';
+  '/api';
 
 const api = axios.create({
   baseURL: API_URL.replace(/\/$/, ''),
@@ -17,19 +17,33 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    if (role) {
-      config.headers['x-user-role'] = role;
     }
 
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const requestPath = String(error.config?.url || '');
+    const isAuthenticationFlow = ['/login', '/logout', '/auth/mfa/', '/auth/password/change'].some((path) => requestPath.includes(path));
+    const hasSessionToken = Boolean(error.config?.headers?.Authorization || localStorage.getItem('token'));
+
+    if (error.response?.status === 401 && hasSessionToken && !isAuthenticationFlow) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('role');
+      localStorage.removeItem('displayName');
+      localStorage.removeItem('sessionIdleTimeoutMs');
+      window.dispatchEvent(new Event('hospital-session-expired'));
+    }
+
     return Promise.reject(error);
   }
 );

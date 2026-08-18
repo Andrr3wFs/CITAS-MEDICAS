@@ -33,8 +33,11 @@ export default function RegisterForm({ onRegisterSuccess }) {
         if (onRegisterSuccess) onRegisterSuccess();
       }
     } catch (err) {
+      const passwordPolicyErrors = err.response?.data?.passwordPolicyErrors;
       setMessage(
-        err.response?.data?.message
+        Array.isArray(passwordPolicyErrors)
+          ? passwordPolicyErrors.join(" ")
+          : err.response?.data?.message
           || (err.request
             ? "No se pudo conectar con el servidor para registrar el usuario. Verifica que el backend este activo y que la URL del API sea correcta."
             : "Error al registrar el usuario.")
@@ -79,6 +82,8 @@ export default function RegisterForm({ onRegisterSuccess }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Crea una contraseña segura"
+                  minLength="12"
+                  autoComplete="new-password"
                   required
                 />
                 <button

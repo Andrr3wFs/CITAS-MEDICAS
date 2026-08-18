@@ -11,27 +11,7 @@ import saludSysLogo from './assets/hospital-cross-mark.svg'
 import rightImage from './assets/right-image.png'
 import { useAutoLogout } from './hooks/useAutoLogout'
 import AuthDoctorIllustration from './components/AuthDoctorIllustration'
-
-const DEMO_ACCOUNTS = [
-  {
-    id: 'paciente',
-    label: 'Paciente',
-    username: 'paciente1',
-    password: '1234'
-  },
-  {
-    id: 'doctor',
-    label: 'Doctor',
-    username: 'doctor1',
-    password: '1234'
-  },
-  {
-    id: 'admin',
-    label: 'Admin',
-    username: 'admin',
-    password: '1234'
-  }
-]
+import { MfaEnrollmentForm, MfaVerificationForm, PasswordChangeForm } from './components/StrongAuthForms'
 
 const WHATSAPP_DEMO_NUMBER = import.meta.env.VITE_WHATSAPP_DEMO_NUMBER || '573177243959'
 const WHATSAPP_DEMO_MESSAGE = 'Hola, estoy interesado en conocer la plataforma y quisiera solicitar una demostración.'
@@ -55,6 +35,9 @@ function App() {
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [authAction, setAuthAction] = useState(null)
   const [verificationCredentials, setVerificationCredentials] = useState(null)
+  const [passwordChangeChallenge, setPasswordChangeChallenge] = useState(null)
+  const [mfaEnrollmentChallenge, setMfaEnrollmentChallenge] = useState(null)
+  const [mfaVerificationChallenge, setMfaVerificationChallenge] = useState(null)
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
@@ -62,7 +45,80 @@ function App() {
     })
 
     return () => window.cancelAnimationFrame(frameId)
-  }, [user, showRegister, verificationCredentials])
+  }, [user, showRegister, verificationCredentials, passwordChangeChallenge, mfaEnrollmentChallenge, mfaVerificationChallenge])
+
+  const clearPendingAuthentication = () => {
+    setVerificationCredentials(null)
+    setPasswordChangeChallenge(null)
+    setMfaEnrollmentChallenge(null)
+    setMfaVerificationChallenge(null)
+  }
+
+  const establishSession = (sessionData) => {
+    if (!sessionData?.token) {
+      setMessage('No se pudo completar la sesión segura.')
+      return false
+    }
+
+    const role = sessionData.role || 'paciente'
+    const resolvedDisplayName = getDisplayName({
+      username: sessionData.username,
+      role,
+      displayName: sessionData.displayName,
+    })
+    const idleTimeoutMs = Number(sessionData.idleTimeoutMs) || 15 * 60 * 1000
+
+    localStorage.setItem('token', sessionData.token)
+    localStorage.setItem('username', sessionData.username)
+    localStorage.setItem('role', role)
+    localStorage.setItem('displayName', resolvedDisplayName)
+    localStorage.setItem('sessionIdleTimeoutMs', String(idleTimeoutMs))
+
+    setUser({
+      token: sessionData.token,
+      username: sessionData.username,
+      role,
+      displayName: resolvedDisplayName,
+      idleTimeoutMs,
+    })
+    clearPendingAuthentication()
+    setUsername('')
+    setPassword('')
+    return true
+  }
+
+  const handleAuthenticationRequirement = (responseData, fallbackUsername) => {
+    if (!responseData) return false
+
+    if (responseData.passwordChangeRequired && responseData.passwordChangeChallengeId) {
+      clearPendingAuthentication()
+      setPasswordChangeChallenge({
+        id: responseData.passwordChangeChallengeId,
+        username: fallbackUsername,
+      })
+      return true
+    }
+
+    if (responseData.mfaEnrollmentRequired && responseData.mfaChallengeId) {
+      clearPendingAuthentication()
+      setMfaEnrollmentChallenge({
+        id: responseData.mfaChallengeId,
+        username: fallbackUsername,
+      })
+      return true
+    }
+
+    if (responseData.mfaRequired && responseData.mfaChallengeId) {
+      clearPendingAuthentication()
+      setMfaVerificationChallenge({
+        id: responseData.mfaChallengeId,
+        username: fallbackUsername,
+      })
+      return true
+    }
+
+    return false
+  }
 
   const loginWithCredentials = async ({ username: nextUsername, password: nextPassword }, nextAuthAction = 'manual') => {
     setMessage('')
@@ -77,27 +133,7 @@ function App() {
         password: nextPassword
       })
 
-      localStorage.setItem('token', res.data.token)
-      localStorage.setItem('username', res.data.username)
-      localStorage.setItem('role', res.data.role || 'paciente')
-
-      const resolvedDisplayName = getDisplayName({
-        username: res.data.username,
-        role: res.data.role || 'paciente',
-        displayName: res.data.displayName
-      })
-
-      localStorage.setItem('displayName', resolvedDisplayName)
-
-      setUser({
-        token: res.data.token,
-        username: res.data.username,
-        role: res.data.role || 'paciente',
-        displayName: resolvedDisplayName
-      })
-
-      setUsername('')
-      setPassword('')
+      establishSession(res.data)
     } catch (err) {
       if (err.response?.data?.verificationRequired) {
         setVerificationCredentials({
@@ -108,28 +144,7 @@ function App() {
         return
       }
 
-      // Si es una cuenta de prueba y el backend falla, aplicamos el respaldo automático (fallback) de demo
-      const matchedDemo = DEMO_ACCOUNTS.find(d => d.username === normalizedUsername && d.password === nextPassword)
-      if (matchedDemo) {
-        const mockToken = 'demo-token-' + matchedDemo.id
-        const mockRole = matchedDemo.id === 'admin' ? 'admin' : matchedDemo.id === 'doctor' ? 'doctor' : 'paciente'
-        const mockUsername = matchedDemo.username
-        const mockDisplayName = matchedDemo.label
-
-        localStorage.setItem('token', mockToken)
-        localStorage.setItem('username', mockUsername)
-        localStorage.setItem('role', mockRole)
-        localStorage.setItem('displayName', mockDisplayName)
-
-        setUser({
-          token: mockToken,
-          username: mockUsername,
-          role: mockRole,
-          displayName: mockDisplayName
-        })
-
-        setUsername('')
-        setPassword('')
+      if (handleAuthenticationRequirement(err.response?.data, normalizedUsername)) {
         return
       }
 
@@ -150,6 +165,7 @@ function App() {
     const storedUsername = localStorage.getItem('username')
     const storedRole = localStorage.getItem('role')
     const storedDisplayName = localStorage.getItem('displayName')
+    const storedIdleTimeoutMs = Number(localStorage.getItem('sessionIdleTimeoutMs')) || 15 * 60 * 1000
     if (token) {
       const resolvedDisplayName = getDisplayName({
         username: storedUsername || 'Paciente',
@@ -161,11 +177,25 @@ function App() {
         token,
         username: storedUsername || 'Paciente',
         role: storedRole || 'paciente',
-        displayName: resolvedDisplayName
+        displayName: resolvedDisplayName,
+        idleTimeoutMs: storedIdleTimeoutMs,
       })
 
       localStorage.setItem('displayName', resolvedDisplayName)
     }
+  }, [])
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      clearPendingAuthentication()
+      setUser(null)
+      setUsername('')
+      setPassword('')
+      setMessage('La sesión expiró por inactividad. Inicia sesión nuevamente.')
+    }
+
+    window.addEventListener('hospital-session-expired', handleSessionExpired)
+    return () => window.removeEventListener('hospital-session-expired', handleSessionExpired)
   }, [])
 
   const handleLogin = async (e) => {
@@ -173,17 +203,18 @@ function App() {
     await loginWithCredentials({ username, password }, 'manual')
   }
 
-  const handleDemoLogin = async (demoAccount) => {
-    setUsername(demoAccount.username)
-    setPassword(demoAccount.password)
-    await loginWithCredentials(demoAccount, demoAccount.id)
-  }
-
   const handleLogout = () => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      api.post('/logout', null, { headers: { Authorization: `Bearer ${token}` } }).catch(() => {})
+    }
+
     localStorage.removeItem('token')
     localStorage.removeItem('username')
     localStorage.removeItem('role')
     localStorage.removeItem('displayName')
+    localStorage.removeItem('sessionIdleTimeoutMs')
+    clearPendingAuthentication()
     setUser(null)
     setUsername('')
     setPassword('')
@@ -193,6 +224,7 @@ function App() {
   useAutoLogout({
     enabled: Boolean(user),
     onIdle: handleLogout,
+    timeoutMs: user?.idleTimeoutMs,
   })
 
   return (
@@ -206,7 +238,26 @@ function App() {
           element={
             user
               ? <Navigate to="/dashboard" />
-              : verificationCredentials
+              : passwordChangeChallenge
+                ? <PasswordChangeForm
+                    challenge={passwordChangeChallenge}
+                    onSession={establishSession}
+                    onRequirement={handleAuthenticationRequirement}
+                    onCancel={clearPendingAuthentication}
+                  />
+                : mfaEnrollmentChallenge
+                  ? <MfaEnrollmentForm
+                      challenge={mfaEnrollmentChallenge}
+                      onSession={establishSession}
+                      onCancel={clearPendingAuthentication}
+                    />
+                  : mfaVerificationChallenge
+                    ? <MfaVerificationForm
+                        challenge={mfaVerificationChallenge}
+                        onSession={establishSession}
+                        onCancel={clearPendingAuthentication}
+                      />
+                  : verificationCredentials
                 ? <VerificationForm
                     credentials={verificationCredentials}
                     onVerified={async () => {
@@ -220,7 +271,7 @@ function App() {
                     showRegister={showRegister}
                     onShowRegister={() => setShowRegister(true)}
                     onShowLogin={() => setShowRegister(false)}
-                    loginProps={{ username, setUsername, password, setPassword, handleLogin, handleDemoLogin, authAction, isLoggingIn, message }}
+                    loginProps={{ username, setUsername, password, setPassword, handleLogin, authAction, isLoggingIn, message }}
                   />
           }
         />
@@ -340,7 +391,7 @@ function AuthPortal({ showRegister, onShowRegister, onShowLogin, loginProps }) {
   )
 }
 
-function LoginForm({ username, setUsername, password, setPassword, handleLogin, handleDemoLogin, authAction, isLoggingIn, message, onShowRegister }) {
+function LoginForm({ username, setUsername, password, setPassword, handleLogin, authAction, isLoggingIn, message, onShowRegister }) {
   const [showPassword, setShowPassword] = useState(false)
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
   const isManualLoginPending = isLoggingIn && authAction === 'manual'
@@ -381,6 +432,7 @@ function LoginForm({ username, setUsername, password, setPassword, handleLogin, 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Ingresa tu contraseña"
+                  autoComplete="current-password"
                   required
                 />
                 <button
@@ -431,31 +483,6 @@ function LoginForm({ username, setUsername, password, setPassword, handleLogin, 
             </button>
 
           </form>
-
-          <div className="auth-demo-panel">
-            <p className="auth-demo-label">Acceso de prueba</p>
-            <div className="auth-demo-grid">
-              {DEMO_ACCOUNTS.map((demoAccount) => {
-                const isActiveDemo = isLoggingIn && authAction === demoAccount.id
-
-                return (
-                  <button
-                    key={demoAccount.id}
-                    type="button"
-                    className="auth-demo-button"
-                    data-role={demoAccount.id}
-                    onClick={() => handleDemoLogin(demoAccount)}
-                    disabled={isLoggingIn}
-                  >
-                    <span className="auth-demo-button-label">{demoAccount.label}</span>
-                    <span className="auth-demo-button-action">
-                      {isActiveDemo ? 'Entrando...' : 'Entrar'}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
 
           <div className="auth-login-request">
             <span>¿Necesitas acceso?</span>
