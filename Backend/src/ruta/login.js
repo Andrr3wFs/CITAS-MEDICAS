@@ -19,7 +19,12 @@ const {
   recordChallengeFailure,
   revokeUserSessions,
 } = require('../authSessions');
-const { createEnrollment, createEnrollmentPresentation, verifyTotpCode } = require('../mfa');
+const {
+  createEnrollment,
+  createEnrollmentPresentation,
+  MfaSecretDecryptionError,
+  verifyTotpCode,
+} = require('../mfa');
 const { validatePassword } = require('../passwordPolicy');
 
 const MAX_LOGIN_FAILURES = 5;
@@ -134,6 +139,19 @@ const clearFailedLogins = (user) => {
 };
 
 const findChallengeUser = (challenge) => users.find((user) => user.usuario === challenge?.username) || null;
+
+const respondToMfaVerificationError = (res, challenge, error) => {
+  if (error instanceof MfaSecretDecryptionError) {
+    console.error(`No se pudo descifrar el secreto MFA de ${challenge?.username || 'un usuario'}. Verifica MFA_ENCRYPTION_KEY.`);
+    return res.status(500).json({
+      success: false,
+      message: 'No se pudo validar la configuración MFA. Solicita al administrador que reinicie tu configuración MFA.',
+    });
+  }
+
+  recordChallengeFailure(challenge);
+  return res.status(400).json({ success: false, message: 'El código MFA no es válido.' });
+};
 
 router.post('/login', (req, res) => {
   const { usuario, password } = req.body;
@@ -307,8 +325,7 @@ router.post('/auth/mfa/confirm', (req, res) => {
       return res.status(400).json({ success: false, message: 'El código MFA no es válido.' });
     }
   } catch (error) {
-    recordChallengeFailure(challenge);
-    return res.status(400).json({ success: false, message: 'El código MFA no es válido.' });
+    return respondToMfaVerificationError(res, challenge, error);
   }
 
   user.mfaSecret = challenge.mfaEnrollmentSecret;
@@ -336,8 +353,7 @@ router.post('/auth/mfa/verify', (req, res) => {
       return res.status(400).json({ success: false, message: 'El código MFA no es válido.' });
     }
   } catch (error) {
-    recordChallengeFailure(challenge);
-    return res.status(400).json({ success: false, message: 'El código MFA no es válido.' });
+    return respondToMfaVerificationError(res, challenge, error);
   }
 
   consumeAuthChallenge(challenge);

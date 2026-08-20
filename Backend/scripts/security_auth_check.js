@@ -2,6 +2,7 @@ const assert = require('assert/strict');
 const bcrypt = require('bcrypt');
 const { spawn } = require('child_process');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 const os = require('os');
 const path = require('path');
 const { authenticator } = require('otplib');
@@ -118,6 +119,20 @@ const request = async (method, pathname, body, token, additionalHeaders = {}) =>
   return { status: response.status, body: await response.json() };
 };
 
+const getPersistedSession = (token) => {
+  const sessionId = jwt.decode(token)?.sid;
+  const persistedData = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+  return persistedData.sessions.find((session) => session.id === sessionId) || null;
+};
+
+const assertMfaVerifiedSession = (token, username) => {
+  const session = getPersistedSession(token);
+  assert.equal(session?.username, username, `No se encontró la sesión de ${username}.`);
+  assert.ok(Number.isFinite(Date.parse(session?.mfaVerifiedAt || '')), `${username} no registró mfaVerifiedAt.`);
+};
+
+const getPreviousStepCode = (secret) => authenticator.clone({ epoch: Date.now() - 30 * 1000 }).generate(secret);
+
 const enrollMfaAndGetSession = async (username, password, role) => {
   const login = await request('POST', '/login', { usuario: username, password, role });
   assert.equal(login.status, 403, `${username} debe requerir inscripción MFA.`);
@@ -129,11 +144,12 @@ const enrollMfaAndGetSession = async (username, password, role) => {
 
   const confirmation = await request('POST', '/auth/mfa/confirm', {
     challengeId: login.body.mfaChallengeId,
-    code: authenticator.generate(enrollment.body.manualEntryKey),
+    code: getPreviousStepCode(enrollment.body.manualEntryKey),
   });
   assert.equal(confirmation.status, 200, 'No se pudo confirmar MFA.');
   assert.ok(confirmation.body.token, 'MFA no emitió una sesión.');
-  return confirmation.body.token;
+  assertMfaVerifiedSession(confirmation.body.token, username);
+  return { token: confirmation.body.token, manualEntryKey: enrollment.body.manualEntryKey };
 };
 
 const run = async () => {
@@ -213,7 +229,8 @@ const run = async () => {
     const doctorSchedule = await request('GET', '/doctor/citas', undefined, patientToken);
     assert.equal(doctorSchedule.status, 403, 'El paciente accedió a horarios de médicos.');
 
-    const doctorToken = await enrollMfaAndGetSession('doctor1', 'Medico#2026Clave', 'doctor');
+    const doctorEnrollment = await enrollMfaAndGetSession('doctor1', 'Medico#2026Clave', 'doctor');
+    const doctorToken = doctorEnrollment.token;
     const doctorMetrics = await request('GET', '/metrics/appointments', undefined, doctorToken);
     assert.equal(doctorMetrics.status, 200, 'El médico MFA no pudo consultar sus métricas.');
     assert.equal(doctorMetrics.body.attended, 1, 'Las métricas del médico incluyen citas ajenas.');
@@ -233,7 +250,26 @@ const run = async () => {
     }, doctorToken);
     assert.equal(ownLabOrder.status, 200, 'El médico no pudo crear una orden de su cita asignada.');
 
-    const adminToken = await enrollMfaAndGetSession('admin', 'Luna#2026Clave', 'admin');
+    const doctorLogin = await request('POST', '/login', {
+      usuario: 'doctor1',
+      password: 'Medico#2026Clave',
+      role: 'doctor',
+    });
+    assert.equal(doctorLogin.status, 401, 'El médico con MFA habilitado no recibió un desafío de inicio de sesión.');
+    assert.equal(doctorLogin.body.mfaRequired, true, 'Falta el desafío MFA de inicio de sesión del médico.');
+
+    const doctorMfaLogin = await request('POST', '/auth/mfa/verify', {
+      challengeId: doctorLogin.body.mfaChallengeId,
+      code: getPreviousStepCode(doctorEnrollment.manualEntryKey),
+    });
+    assert.equal(doctorMfaLogin.status, 200, 'El código TOTP con una ventana anterior fue rechazado al iniciar sesión.');
+    assertMfaVerifiedSession(doctorMfaLogin.body.token, 'doctor1');
+
+    const doctorMfaMetrics = await request('GET', '/metrics/appointments', undefined, doctorMfaLogin.body.token);
+    assert.equal(doctorMfaMetrics.status, 200, 'La sesión MFA del médico fue rechazada por el middleware.');
+
+    const adminEnrollment = await enrollMfaAndGetSession('admin', 'Luna#2026Clave', 'admin');
+    const adminToken = adminEnrollment.token;
     const adminAppointments = await request('GET', '/admin/citas', undefined, adminToken);
     assert.equal(adminAppointments.status, 200, 'El administrador MFA no pudo acceder a su ruta.');
 

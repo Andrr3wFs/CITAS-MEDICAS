@@ -3,15 +3,27 @@ const { authenticator } = require('otplib');
 const QRCode = require('qrcode');
 
 const MFA_ISSUER = process.env.MFA_ISSUER || 'MediCenter';
+const MFA_TOTP_WINDOW = 1;
+const MFA_SECRET_PATTERN = /^[A-Z2-7]+={0,6}$/i;
+
+class MfaSecretDecryptionError extends Error {
+  constructor() {
+    super('No se pudo descifrar el secreto MFA almacenado.');
+    this.name = 'MfaSecretDecryptionError';
+  }
+}
 
 const getEncryptionKey = () => {
-  const secret = process.env.MFA_ENCRYPTION_KEY || process.env.JWT_SECRET;
+  const mfaEncryptionKey = String(process.env.MFA_ENCRYPTION_KEY || '').trim();
+  const fallbackSecret = String(process.env.JWT_SECRET || '').trim();
 
-  if (!secret && process.env.NODE_ENV === 'production') {
-    throw new Error('MFA_ENCRYPTION_KEY o JWT_SECRET es obligatorio en producción.');
+  if (!mfaEncryptionKey && process.env.NODE_ENV === 'production') {
+    throw new Error('MFA_ENCRYPTION_KEY es obligatorio en producción.');
   }
 
-  return crypto.createHash('sha256').update(secret || 'development-only-mfa-key').digest();
+  return crypto.createHash('sha256').update(
+    mfaEncryptionKey || fallbackSecret || 'development-only-mfa-key'
+  ).digest();
 };
 
 const encryptMfaSecret = (secret) => {
@@ -29,23 +41,37 @@ const encryptMfaSecret = (secret) => {
 };
 
 const decryptMfaSecret = (encryptedSecret) => {
-  const [version, initializationVector, authenticationTag, encrypted] = String(encryptedSecret || '').split('.');
+  try {
+    const [version, initializationVector, authenticationTag, encrypted] = String(encryptedSecret || '').split('.');
 
-  if (version !== 'v1' || !initializationVector || !authenticationTag || !encrypted) {
-    throw new Error('El secreto MFA almacenado no tiene un formato válido.');
+    if (version !== 'v1' || !initializationVector || !authenticationTag || !encrypted) {
+      throw new MfaSecretDecryptionError();
+    }
+
+    const decipher = crypto.createDecipheriv(
+      'aes-256-gcm',
+      getEncryptionKey(),
+      Buffer.from(initializationVector, 'base64url')
+    );
+    decipher.setAuthTag(Buffer.from(authenticationTag, 'base64url'));
+
+    const secret = Buffer.concat([
+      decipher.update(Buffer.from(encrypted, 'base64url')),
+      decipher.final(),
+    ]).toString('utf8');
+
+    if (!MFA_SECRET_PATTERN.test(secret)) {
+      throw new MfaSecretDecryptionError();
+    }
+
+    return secret;
+  } catch (error) {
+    if (error instanceof MfaSecretDecryptionError) {
+      throw error;
+    }
+
+    throw new MfaSecretDecryptionError();
   }
-
-  const decipher = crypto.createDecipheriv(
-    'aes-256-gcm',
-    getEncryptionKey(),
-    Buffer.from(initializationVector, 'base64url')
-  );
-  decipher.setAuthTag(Buffer.from(authenticationTag, 'base64url'));
-
-  return Buffer.concat([
-    decipher.update(Buffer.from(encrypted, 'base64url')),
-    decipher.final(),
-  ]).toString('utf8');
 };
 
 const createEnrollmentPresentation = async (username, encryptedSecret) => {
@@ -78,11 +104,14 @@ const verifyTotpCode = (encryptedSecret, code) => {
     return false;
   }
 
-  authenticator.options = { window: 1 };
-  return authenticator.check(String(code).trim(), decryptMfaSecret(encryptedSecret));
+  const secret = decryptMfaSecret(encryptedSecret);
+  const totpAuthenticator = authenticator.clone({ window: MFA_TOTP_WINDOW });
+  return totpAuthenticator.check(String(code).trim(), secret);
 };
 
 module.exports = {
+  MFA_TOTP_WINDOW,
+  MfaSecretDecryptionError,
   createEnrollment,
   createEnrollmentPresentation,
   decryptMfaSecret,
