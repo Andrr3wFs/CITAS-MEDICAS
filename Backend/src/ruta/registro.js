@@ -20,21 +20,38 @@ const getLatestProcessedRequest = (username) => accessRequests
     return secondDate - firstDate;
   })[0];
 
+const normalizeDisplayName = (value) => String(value || '')
+  .trim()
+  .replace(/[<>]/g, '')
+  .replace(/\s+/g, ' ');
+
 router.post('/register', async (req, res) => {
   const normalizedUsername = normalizeUsername(req.body?.usuario);
   const normalizedPassword = String(req.body?.password || '');
+  const normalizedName = normalizeDisplayName(req.body?.nombre);
 
   if (!normalizedUsername || !normalizedPassword) {
     return res.status(400).json({ success: false, message: 'Usuario y contraseña son obligatorios' });
   }
 
-  const passwordValidation = validatePassword(normalizedPassword, { username: normalizedUsername });
+  const passwordValidation = validatePassword(normalizedPassword, {
+    username: normalizedUsername,
+    displayName: normalizedName,
+  });
   if (!passwordValidation.valid) {
     return res.status(400).json({
       success: false,
       message: 'La contraseña no cumple la política de seguridad.',
       passwordPolicyErrors: passwordValidation.errors,
     });
+  }
+
+  if (!normalizedName) {
+    return res.status(400).json({ success: false, message: 'El nombre completo es obligatorio.' });
+  }
+
+  if (normalizedName.length > 100) {
+    return res.status(400).json({ success: false, message: 'El nombre completo no puede superar los 100 caracteres.' });
   }
 
   const latestProcessedRequest = getLatestProcessedRequest(normalizedUsername);
@@ -74,7 +91,7 @@ router.post('/register', async (req, res) => {
     status: 'pending',
     requestedAt: new Date().toISOString(),
     role: 'paciente',
-    nombre: normalizedUsername,
+    nombre: normalizedName,
     passwordPolicyVersion: PASSWORD_POLICY_VERSION,
   };
 

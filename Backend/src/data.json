@@ -374,6 +374,37 @@
       "mfaEnabled": false,
       "passwordChangeRequired": true,
       "sessionVersion": 1
+    },
+    {
+      "role": "admin",
+      "nombre": "Administracion MediCenter",
+      "usuario": "admin.medicenter",
+      "password": "$2b$10$ytOHQ0.Jq8KO3pzsMXzDn.0x4dqPb/xUoAL0TGMQzmOqEfwT.PexG",
+      "passwordPolicyVersion": 1,
+      "passwordChangeRequired": false,
+      "mfaEnabled": false,
+      "sessionVersion": 1
+    },
+    {
+      "role": "doctor",
+      "nombre": "Dra. Cuenta Medica",
+      "usuario": "doctor.medicenter",
+      "password": "$2b$10$34/VTVl8iirH3I68Qu.qpOCJGF9Ew1MtUcB5aUmR.Be6o0l9AInAu",
+      "passwordPolicyVersion": 1,
+      "passwordChangeRequired": false,
+      "mfaEnabled": false,
+      "sessionVersion": 1
+    },
+    {
+      "role": "paciente",
+      "nombre": "Paciente de prueba",
+      "usuario": "patient.medicenter",
+      "password": "$2b$10$Suo94sAYDh8PgNm9Lul/KuqJQEwIoXFYL6YAAzNckbehfbG/p3Fka",
+      "estadoAprobacion": "aprobado",
+      "passwordPolicyVersion": 1,
+      "passwordChangeRequired": false,
+      "mfaEnabled": false,
+      "sessionVersion": 1
     }
   ],
   "pushSubscriptions": [],
@@ -440,8 +471,36 @@
     }
   ],
   "auditLogs": [],
-  "sessions": [],
-  "authChallenges": [],
+  "sessions": [
+    {
+      "id": "bacd5362-4dc6-49f3-a949-eab89c424262",
+      "username": "patient.medicenter",
+      "sessionVersion": 1,
+      "issuedAt": "2026-08-20T19:45:42.696Z",
+      "lastActivityAt": "2026-08-20T19:45:42.696Z",
+      "expiresAt": "2026-08-21T03:45:42.696Z"
+    }
+  ],
+  "authChallenges": [
+    {
+      "id": "c7157c6d-6415-4f97-a039-029426519e7f",
+      "username": "doctor.medicenter",
+      "purpose": "mfa-enrollment",
+      "createdAt": "2026-08-20T19:45:42.905Z",
+      "expiresAt": "2026-08-20T19:50:42.905Z",
+      "attempts": 0,
+      "sessionVersion": 1
+    },
+    {
+      "id": "6d4e57d8-b1f7-49df-9fc5-162112a19c84",
+      "username": "admin.medicenter",
+      "purpose": "mfa-enrollment",
+      "createdAt": "2026-08-20T19:45:43.055Z",
+      "expiresAt": "2026-08-20T19:50:43.055Z",
+      "attempts": 0,
+      "sessionVersion": 1
+    }
+  ],
   "integrationConfig": {
     "labEndpoint": ""
   }

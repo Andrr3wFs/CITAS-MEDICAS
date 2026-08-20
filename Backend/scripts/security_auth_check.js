@@ -85,6 +85,7 @@ const startServer = () => new Promise((resolve, reject) => {
       HOSPITAL_DATA_FILE: dataFile,
       JWT_SECRET: 'security-test-jwt-secret',
       MFA_ENCRYPTION_KEY: 'security-test-mfa-encryption-key',
+      DISABLE_EMAIL_NOTIFICATIONS: 'true',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -149,11 +150,29 @@ const run = async () => {
     assert.equal(anonymousPush.status, 401, 'Una suscripción push anónima no debe aceptarse.');
 
     const weakRegistration = await request('POST', '/register', {
+      nombre: 'Paciente nuevo',
       usuario: 'nuevo.paciente',
       password: '1234',
     });
     assert.equal(weakRegistration.status, 400, 'Se aceptó una contraseña débil.');
     assert.ok(Array.isArray(weakRegistration.body.passwordPolicyErrors), 'Faltan detalles de política de contraseña.');
+
+    const missingNameRegistration = await request('POST', '/register', {
+      usuario: 'sin.nombre',
+      password: 'Brisa#2026Fuerte',
+    });
+    assert.equal(missingNameRegistration.status, 400, 'Se aceptó un registro sin nombre completo.');
+
+    const namedRegistration = await request('POST', '/register', {
+      nombre: 'Alicia Mendez',
+      usuario: 'alicia.mendez@medicenter.test',
+      password: 'Canyon!42Birch2026',
+    });
+    assert.equal(namedRegistration.status, 200, 'Se rechazó un registro con nombre completo válido.');
+    const persistedRegistration = JSON.parse(fs.readFileSync(dataFile, 'utf8')).accessRequests.find(
+      (requestEntry) => requestEntry.usuario === 'alicia.mendez@medicenter.test'
+    );
+    assert.equal(persistedRegistration?.nombre, 'Alicia Mendez', 'El nombre completo no se guardó en la solicitud.');
 
     const legacyLogin = await request('POST', '/login', { usuario: 'legado', password: 'Antigua#2026Clave' });
     assert.equal(legacyLogin.status, 403, 'La cuenta heredada debe renovar su contraseña.');

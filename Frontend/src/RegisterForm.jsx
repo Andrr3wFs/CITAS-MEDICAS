@@ -3,6 +3,7 @@ import api from "./api";
 import "./Login.css";
 
 export default function RegisterForm({ onRegisterSuccess }) {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,7 @@ export default function RegisterForm({ onRegisterSuccess }) {
 
     try {
       const res = await api.post("/register", {
+        nombre: fullName.trim(),
         usuario: normalizedUsername,
         password,
       });
@@ -24,10 +26,12 @@ export default function RegisterForm({ onRegisterSuccess }) {
       if (res.data?.status === 'pending') {
         setIsRequestPending(true);
         setMessage("✓ Solicitud enviada. El administrador revisará tu solicitud y te notificará cuando sea aprobada.");
+        setFullName("");
         setEmail("");
         setPassword("");
       } else {
         setMessage("Usuario registrado correctamente. Ya puedes iniciar sesión.");
+        setFullName("");
         setEmail("");
         setPassword("");
         if (onRegisterSuccess) onRegisterSuccess();
@@ -57,6 +61,20 @@ export default function RegisterForm({ onRegisterSuccess }) {
           )}
 
           <form className="auth-form" onSubmit={handleSubmit}>
+            <div className="auth-field">
+              <label htmlFor="register-full-name">Nombre completo</label>
+              <input
+                id="register-full-name"
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Nombre y apellidos"
+                autoComplete="name"
+                maxLength="100"
+                required
+              />
+            </div>
+
             <div className="auth-field">
             <label htmlFor="register-email">Correo electrónico</label>
              <input

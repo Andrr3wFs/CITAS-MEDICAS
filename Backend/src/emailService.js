@@ -25,6 +25,10 @@ const initializeTransporter = () => {
 };
 
 const sendEmailToAdmins = async (adminEmails, subject, htmlContent) => {
+  if (process.env.DISABLE_EMAIL_NOTIFICATIONS === 'true') {
+    return { success: true, skipped: true };
+  }
+
   try {
     const transport = initializeTransporter();
     
