@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { LogIn } from 'lucide-react'
+import { LogIn, ShieldCheck, Stethoscope, UserRound } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 import api from './api'
 import "./Login.css"
@@ -17,6 +17,12 @@ const WHATSAPP_DEMO_NUMBER = import.meta.env.VITE_WHATSAPP_DEMO_NUMBER || '57317
 const WHATSAPP_DEMO_MESSAGE = 'Hola, estoy interesado en conocer la plataforma y quisiera solicitar una demostración.'
 const WHATSAPP_DEMO_URL = `https://wa.me/${WHATSAPP_DEMO_NUMBER}?text=${encodeURIComponent(WHATSAPP_DEMO_MESSAGE)}`
 
+const LOGIN_PORTAL_ROLES = [
+  { value: 'paciente', label: 'Paciente', Icon: UserRound },
+  { value: 'doctor', label: 'Médico', Icon: Stethoscope },
+  { value: 'admin', label: 'Admin', Icon: ShieldCheck },
+]
+
 const getDisplayName = ({ username, role, displayName }) => {
   if (role === 'admin' && ['administrador', 'administracion'].includes(String(displayName || '').trim().toLowerCase())) {
     return 'Admin'
@@ -29,6 +35,7 @@ function App() {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [selectedLoginRole, setSelectedLoginRole] = useState('paciente')
   const [message, setMessage] = useState('')
   const [user, setUser] = useState(null)
   const [showRegister, setShowRegister] = useState(false)
@@ -120,7 +127,7 @@ function App() {
     return false
   }
 
-  const loginWithCredentials = async ({ username: nextUsername, password: nextPassword }, nextAuthAction = 'manual') => {
+  const loginWithCredentials = async ({ username: nextUsername, password: nextPassword, portalRole }, nextAuthAction = 'manual') => {
     setMessage('')
     setIsLoggingIn(true)
     setAuthAction(nextAuthAction)
@@ -130,7 +137,8 @@ function App() {
     try {
       const res = await api.post('/login', {
         usuario: normalizedUsername,
-        password: nextPassword
+        password: nextPassword,
+        portalRole,
       })
 
       establishSession(res.data)
@@ -139,6 +147,7 @@ function App() {
         setVerificationCredentials({
           username: err.response.data.username || normalizedUsername,
           password: nextPassword,
+          portalRole,
           resendAvailableAt: err.response.data.resendAvailableAt,
         })
         return
@@ -200,7 +209,7 @@ function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    await loginWithCredentials({ username, password }, 'manual')
+    await loginWithCredentials({ username, password, portalRole: selectedLoginRole }, 'manual')
   }
 
   const handleLogout = () => {
@@ -218,6 +227,7 @@ function App() {
     setUser(null)
     setUsername('')
     setPassword('')
+    setSelectedLoginRole('paciente')
     setMessage('')
   }
 
@@ -271,7 +281,21 @@ function App() {
                     showRegister={showRegister}
                     onShowRegister={() => setShowRegister(true)}
                     onShowLogin={() => setShowRegister(false)}
-                    loginProps={{ username, setUsername, password, setPassword, handleLogin, authAction, isLoggingIn, message }}
+                    loginProps={{
+                      username,
+                      setUsername,
+                      password,
+                      setPassword,
+                      handleLogin,
+                      authAction,
+                      isLoggingIn,
+                      message,
+                      selectedRole: selectedLoginRole,
+                      onSelectRole: (role) => {
+                        setSelectedLoginRole(role)
+                        setMessage('')
+                      },
+                    }}
                   />
           }
         />
@@ -391,15 +415,34 @@ function AuthPortal({ showRegister, onShowRegister, onShowLogin, loginProps }) {
   )
 }
 
-function LoginForm({ username, setUsername, password, setPassword, handleLogin, authAction, isLoggingIn, message, onShowRegister }) {
+function LoginForm({ username, setUsername, password, setPassword, handleLogin, authAction, isLoggingIn, message, onShowRegister, selectedRole, onSelectRole }) {
   const [showPassword, setShowPassword] = useState(false)
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
   const isManualLoginPending = isLoggingIn && authAction === 'manual'
+  const selectedRoleLabel = LOGIN_PORTAL_ROLES.find((role) => role.value === selectedRole)?.label.toLowerCase() || 'usuario'
 
   return (
         <section className="auth-panel auth-panel-login auth-login-pane">
           <p className="auth-card-kicker">Acceso seguro</p>
           <h2>Iniciar sesión</h2>
+
+          <div className="auth-role-picker">
+            <span className="auth-role-picker-label">Ingresa como</span>
+            <div className="auth-role-options" role="group" aria-label="Tipo de acceso">
+              {LOGIN_PORTAL_ROLES.map(({ value, label, Icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`auth-role-option ${selectedRole === value ? 'is-selected' : ''}`}
+                  onClick={() => onSelectRole(value)}
+                  aria-pressed={selectedRole === value}
+                >
+                  <Icon aria-hidden="true" size={16} strokeWidth={2} />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
           {message && (
             <p className="auth-feedback auth-feedback-error">
@@ -478,7 +521,7 @@ function LoginForm({ username, setUsername, password, setPassword, handleLogin, 
                   Ingresando...
                 </span>
               ) : (
-                'Ingresar al sistema'
+                `Ingresar como ${selectedRoleLabel}`
               )}
             </button>
 

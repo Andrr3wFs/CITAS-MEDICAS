@@ -24,8 +24,20 @@ const { validatePassword } = require('../passwordPolicy');
 
 const MAX_LOGIN_FAILURES = 5;
 const LOGIN_LOCKOUT_MS = 15 * 60 * 1000;
+const LOGIN_PORTAL_ROLES = new Set(['paciente', 'doctor', 'admin']);
 
 const getUserRole = (user) => String(user?.role || 'paciente').trim().toLowerCase();
+const normalizePortalRole = (role) => String(role || '').trim().toLowerCase();
+
+const canAccessPortal = (userRole, portalRole) => {
+  if (!portalRole) return true;
+
+  if (portalRole === 'admin') {
+    return ['admin', 'secretaria'].includes(userRole);
+  }
+
+  return userRole === portalRole;
+};
 
 const createChallengeForUser = (user, purpose) => createAuthChallenge({
   username: user.usuario,
@@ -119,6 +131,14 @@ router.post('/login', (req, res) => {
 
   const normalizedUsername = normalizeUsername(usuario);
   const normalizedPassword = String(password || '');
+  const portalRole = normalizePortalRole(req.body?.portalRole);
+
+  if (portalRole && !LOGIN_PORTAL_ROLES.has(portalRole)) {
+    return res.status(400).json({
+      success: false,
+      message: 'El tipo de acceso seleccionado no es válido.',
+    });
+  }
 
   // Verificar si tiene una solicitud pendiente
   const pendingRequest = accessRequests.find(
@@ -161,6 +181,13 @@ router.post('/login', (req, res) => {
     return res.status(401).json({
       success: false,
       message: 'Credenciales incorrectas',
+    });
+  }
+
+  if (!canAccessPortal(getUserRole(user), portalRole)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Esta cuenta no tiene acceso al portal seleccionado.',
     });
   }
 

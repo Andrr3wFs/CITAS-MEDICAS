@@ -165,7 +165,18 @@ const run = async () => {
     });
     assert.equal(legacyChange.status, 200, 'La renovación de contraseña válida fue rechazada.');
 
-    const patientLogin = await request('POST', '/login', { usuario: 'pacientea', password: 'Brisa#2026Fuerte' });
+    const mismatchedPortal = await request('POST', '/login', {
+      usuario: 'pacientea',
+      password: 'Brisa#2026Fuerte',
+      portalRole: 'doctor',
+    });
+    assert.equal(mismatchedPortal.status, 403, 'Un paciente pudo acceder al portal médico.');
+
+    const patientLogin = await request('POST', '/login', {
+      usuario: 'pacientea',
+      password: 'Brisa#2026Fuerte',
+      portalRole: 'paciente',
+    });
     assert.equal(patientLogin.status, 200, 'El paciente no obtuvo sesión.');
     const patientToken = patientLogin.body.token;
 
