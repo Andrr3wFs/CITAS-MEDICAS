@@ -283,29 +283,43 @@ router.post('/auth/mfa/enrollment', async (req, res) => {
     return res.status(401).json({ success: false, message: 'La configuración MFA no es válida o venció.' });
   }
 
-  try {
-    if (!challenge.mfaEnrollmentSecret) {
-      const enrollment = await createEnrollment(user.usuario);
-      challenge.mfaEnrollmentSecret = enrollment.encryptedSecret;
-      saveData();
-      return res.json({
-        success: true,
-        challengeId: challenge.id,
-        qrCodeDataUrl: enrollment.qrCodeDataUrl,
-        manualEntryKey: enrollment.manualEntryKey,
-        expiresAt: challenge.expiresAt,
-      });
-    }
+  const createEnrollmentForChallenge = async () => {
+    const enrollment = await createEnrollment(user.usuario);
+    challenge.mfaEnrollmentSecret = enrollment.encryptedSecret;
+    saveData();
+    return enrollment;
+  };
 
-    const presentation = await createEnrollmentPresentation(user.usuario, challenge.mfaEnrollmentSecret);
+  try {
+    const enrollment = challenge.mfaEnrollmentSecret
+      ? await createEnrollmentPresentation(user.usuario, challenge.mfaEnrollmentSecret)
+      : await createEnrollmentForChallenge();
+
     return res.json({
       success: true,
       challengeId: challenge.id,
-      qrCodeDataUrl: presentation.qrCodeDataUrl,
-      manualEntryKey: presentation.manualEntryKey,
+      qrCodeDataUrl: enrollment.qrCodeDataUrl,
+      manualEntryKey: enrollment.manualEntryKey,
       expiresAt: challenge.expiresAt,
     });
   } catch (error) {
+    if (error instanceof MfaSecretDecryptionError) {
+      console.warn(`Se regeneró una inscripción MFA incompleta para ${user.usuario} porque su secreto no pudo descifrarse.`);
+
+      try {
+        const enrollment = await createEnrollmentForChallenge();
+        return res.json({
+          success: true,
+          challengeId: challenge.id,
+          qrCodeDataUrl: enrollment.qrCodeDataUrl,
+          manualEntryKey: enrollment.manualEntryKey,
+          expiresAt: challenge.expiresAt,
+        });
+      } catch (regenerationError) {
+        console.error('Error al regenerar MFA:', regenerationError);
+      }
+    }
+
     console.error('Error al preparar MFA:', error);
     return res.status(500).json({ success: false, message: 'No se pudo preparar la configuración MFA.' });
   }

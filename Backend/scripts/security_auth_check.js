@@ -25,7 +25,8 @@ const createUser = (usuario, password, role, nombre, overrides = {}) => ({
 });
 
 const writeFixture = () => {
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
   const fixture = {
     appointments: [
       {
@@ -70,7 +71,18 @@ const writeFixture = () => {
     beds: [],
     auditLogs: [],
     sessions: [],
-    authChallenges: [],
+    authChallenges: [
+      {
+        id: 'recoverable-mfa-enrollment',
+        username: 'doctor2',
+        purpose: 'mfa-enrollment',
+        createdAt: now.toISOString(),
+        expiresAt: new Date(now.getTime() + 5 * 60 * 1000).toISOString(),
+        attempts: 0,
+        sessionVersion: 1,
+        mfaEnrollmentSecret: 'v1.invalid.invalid.invalid',
+      },
+    ],
     integrationConfig: {},
   };
 
@@ -164,6 +176,16 @@ const run = async () => {
       subscription: { endpoint: 'https://example.invalid/push' },
     });
     assert.equal(anonymousPush.status, 401, 'Una suscripción push anónima no debe aceptarse.');
+
+    const recoveredEnrollment = await request('POST', '/auth/mfa/enrollment', {
+      challengeId: 'recoverable-mfa-enrollment',
+    });
+    assert.equal(recoveredEnrollment.status, 200, 'Una inscripción MFA incompleta no pudo regenerarse.');
+    assert.ok(recoveredEnrollment.body.qrCodeDataUrl, 'La inscripción MFA regenerada no incluye QR.');
+    const recoveredChallenge = JSON.parse(fs.readFileSync(dataFile, 'utf8')).authChallenges.find(
+      (challenge) => challenge.id === 'recoverable-mfa-enrollment'
+    );
+    assert.notEqual(recoveredChallenge?.mfaEnrollmentSecret, 'v1.invalid.invalid.invalid', 'El secreto MFA dañado no fue reemplazado.');
 
     const weakRegistration = await request('POST', '/register', {
       nombre: 'Paciente nuevo',
