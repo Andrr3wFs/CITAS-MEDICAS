@@ -5561,18 +5561,38 @@ body{
   white-space: nowrap;
   box-shadow: none;
   cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .auth-role-option + .auth-role-option {
   border-left: 1px solid #cbd5e1;
 }
 
-.auth-role-option:hover {
-  background: #f0fdfa;
-  color: #0f766e;
+.auth-role-option[data-role="patient"]:hover {
+  background: #e0f2fe;
+  color: #0369a1;
+  box-shadow: inset 0 0 16px rgba(14, 165, 233, 0.22), inset 0 0 0 1px rgba(14, 165, 233, 0.42);
+}
+
+.auth-role-option[data-role="doctor"]:hover {
+  background: #dcfce7;
+  color: #15803d;
+  box-shadow: inset 0 0 16px rgba(34, 197, 94, 0.22), inset 0 0 0 1px rgba(34, 197, 94, 0.42);
+}
+
+.auth-role-option[data-role="admin"]:hover {
+  background: #ffedd5;
+  color: #c2410c;
+  box-shadow: inset 0 0 16px rgba(249, 115, 22, 0.2), inset 0 0 0 1px rgba(249, 115, 22, 0.42);
 }
 
 .auth-role-option.is-selected {
+  background: #ccfbf1;
+  color: #0f766e;
+  box-shadow: inset 0 -2px 0 #0f766e;
+}
+
+.auth-role-option.is-selected:hover {
   background: #ccfbf1;
   color: #0f766e;
   box-shadow: inset 0 -2px 0 #0f766e;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { LogIn, ShieldCheck, Stethoscope, UserRound } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 import api from './api'
@@ -23,6 +23,32 @@ const LOGIN_PORTAL_ROLES = [
   { value: 'admin', label: 'Admin', Icon: ShieldCheck },
 ]
 
+const LOGIN_FORM_DETAILS = {
+  patient: {
+    kicker: 'Portal de pacientes',
+    title: 'Acceso de paciente',
+    usernameLabel: 'Correo o documento',
+    usernamePlaceholder: 'Correo o documento',
+  },
+  doctor: {
+    kicker: 'Portal médico',
+    title: 'Acceso médico',
+    usernameLabel: 'Usuario médico',
+    usernamePlaceholder: 'Usuario o correo profesional',
+  },
+  admin: {
+    kicker: 'Portal de administración',
+    title: 'Acceso administrativo',
+    usernameLabel: 'Usuario administrativo',
+    usernamePlaceholder: 'Usuario administrativo',
+  },
+}
+
+const getLoginRoleFromPath = (pathname) => {
+  const role = pathname.split('/')[2]
+  return LOGIN_FORM_DETAILS[role] ? role : 'patient'
+}
+
 const getDisplayName = ({ username, role, displayName }) => {
   if (role === 'admin' && ['administrador', 'administracion'].includes(String(displayName || '').trim().toLowerCase())) {
     return 'Admin'
@@ -33,9 +59,10 @@ const getDisplayName = ({ username, role, displayName }) => {
 
 function App() {
 
+  const location = useLocation()
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [selectedLoginRole, setSelectedLoginRole] = useState('patient')
   const [message, setMessage] = useState('')
   const [user, setUser] = useState(null)
   const [showRegister, setShowRegister] = useState(false)
@@ -45,6 +72,7 @@ function App() {
   const [passwordChangeChallenge, setPasswordChangeChallenge] = useState(null)
   const [mfaEnrollmentChallenge, setMfaEnrollmentChallenge] = useState(null)
   const [mfaVerificationChallenge, setMfaVerificationChallenge] = useState(null)
+  const selectedLoginRole = getLoginRoleFromPath(location.pathname)
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
@@ -212,6 +240,14 @@ function App() {
     await loginWithCredentials({ username, password, role: selectedLoginRole }, 'manual')
   }
 
+  const handleRoleSelection = (role) => {
+    if (!LOGIN_FORM_DETAILS[role]) return
+
+    setMessage('')
+    setShowRegister(false)
+    navigate(`/login/${role}`)
+  }
+
   const handleLogout = () => {
     const token = localStorage.getItem('token')
     if (token) {
@@ -227,7 +263,6 @@ function App() {
     setUser(null)
     setUsername('')
     setPassword('')
-    setSelectedLoginRole('patient')
     setMessage('')
   }
 
@@ -237,68 +272,67 @@ function App() {
     timeoutMs: user?.idleTimeoutMs,
   })
 
+  const loginRouteElement = user
+    ? <Navigate to="/dashboard" />
+    : passwordChangeChallenge
+      ? <PasswordChangeForm
+          challenge={passwordChangeChallenge}
+          onSession={establishSession}
+          onRequirement={handleAuthenticationRequirement}
+          onCancel={clearPendingAuthentication}
+        />
+      : mfaEnrollmentChallenge
+        ? <MfaEnrollmentForm
+            challenge={mfaEnrollmentChallenge}
+            onSession={establishSession}
+            onCancel={clearPendingAuthentication}
+          />
+        : mfaVerificationChallenge
+          ? <MfaVerificationForm
+              challenge={mfaVerificationChallenge}
+              onSession={establishSession}
+              onCancel={clearPendingAuthentication}
+            />
+          : verificationCredentials
+            ? <VerificationForm
+                credentials={verificationCredentials}
+                onVerified={async () => {
+                  const credentials = verificationCredentials
+                  setVerificationCredentials(null)
+                  await loginWithCredentials(credentials)
+                }}
+                onCancel={() => setVerificationCredentials(null)}
+              />
+            : <AuthPortal
+                showRegister={showRegister}
+                onShowRegister={() => setShowRegister(true)}
+                onShowLogin={() => setShowRegister(false)}
+                isRoleLoginRoute={location.pathname.startsWith('/login/')}
+                loginProps={{
+                  username,
+                  setUsername,
+                  password,
+                  setPassword,
+                  handleLogin,
+                  authAction,
+                  isLoggingIn,
+                  message,
+                  selectedRole: selectedLoginRole,
+                  onSelectRole: handleRoleSelection,
+                }}
+              />
+
   return (
     <div className="app-container">
 
       <Routes>
 
         {/* LOGIN */}
-        <Route
-          path="/"
-          element={
-            user
-              ? <Navigate to="/dashboard" />
-              : passwordChangeChallenge
-                ? <PasswordChangeForm
-                    challenge={passwordChangeChallenge}
-                    onSession={establishSession}
-                    onRequirement={handleAuthenticationRequirement}
-                    onCancel={clearPendingAuthentication}
-                  />
-                : mfaEnrollmentChallenge
-                  ? <MfaEnrollmentForm
-                      challenge={mfaEnrollmentChallenge}
-                      onSession={establishSession}
-                      onCancel={clearPendingAuthentication}
-                    />
-                  : mfaVerificationChallenge
-                    ? <MfaVerificationForm
-                        challenge={mfaVerificationChallenge}
-                        onSession={establishSession}
-                        onCancel={clearPendingAuthentication}
-                      />
-                  : verificationCredentials
-                ? <VerificationForm
-                    credentials={verificationCredentials}
-                    onVerified={async () => {
-                      const credentials = verificationCredentials
-                      setVerificationCredentials(null)
-                      await loginWithCredentials(credentials)
-                    }}
-                    onCancel={() => setVerificationCredentials(null)}
-                  />
-                : <AuthPortal
-                    showRegister={showRegister}
-                    onShowRegister={() => setShowRegister(true)}
-                    onShowLogin={() => setShowRegister(false)}
-                    loginProps={{
-                      username,
-                      setUsername,
-                      password,
-                      setPassword,
-                      handleLogin,
-                      authAction,
-                      isLoggingIn,
-                      message,
-                      selectedRole: selectedLoginRole,
-                      onSelectRole: (role) => {
-                        setSelectedLoginRole(role)
-                        setMessage('')
-                      },
-                    }}
-                  />
-          }
-        />
+        <Route path="/" element={loginRouteElement} />
+        <Route path="/login/patient" element={loginRouteElement} />
+        <Route path="/login/doctor" element={loginRouteElement} />
+        <Route path="/login/admin" element={loginRouteElement} />
+        <Route path="/login/*" element={<Navigate to="/login/patient" replace />} />
 
         {/* DASHBOARD */}
         <Route
@@ -324,8 +358,14 @@ function App() {
   )
 }
 
-function AuthPortal({ showRegister, onShowRegister, onShowLogin, loginProps }) {
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
+function AuthPortal({ showRegister, onShowRegister, onShowLogin, isRoleLoginRoute, loginProps }) {
+  const [isLoginOpen, setIsLoginOpen] = useState(isRoleLoginRoute)
+
+  useEffect(() => {
+    if (isRoleLoginRoute) {
+      setIsLoginOpen(true)
+    }
+  }, [isRoleLoginRoute])
 
   const toggleLogin = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
@@ -420,11 +460,12 @@ function LoginForm({ username, setUsername, password, setPassword, handleLogin, 
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
   const isManualLoginPending = isLoggingIn && authAction === 'manual'
   const selectedRoleLabel = LOGIN_PORTAL_ROLES.find((role) => role.value === selectedRole)?.label.toLowerCase() || 'usuario'
+  const formDetails = LOGIN_FORM_DETAILS[selectedRole] || LOGIN_FORM_DETAILS.patient
 
   return (
         <section className="auth-panel auth-panel-login auth-login-pane">
-          <p className="auth-card-kicker">Acceso seguro</p>
-          <h2>Iniciar sesión</h2>
+          <p className="auth-card-kicker">{formDetails.kicker}</p>
+          <h2>{formDetails.title}</h2>
 
           <div className="auth-role-picker">
             <span className="auth-role-picker-label">Ingresa como</span>
@@ -434,6 +475,7 @@ function LoginForm({ username, setUsername, password, setPassword, handleLogin, 
                   key={value}
                   type="button"
                   className={`auth-role-option ${selectedRole === value ? 'is-selected' : ''}`}
+                  data-role={value}
                   onClick={() => onSelectRole(value)}
                   aria-pressed={selectedRole === value}
                 >
@@ -452,13 +494,13 @@ function LoginForm({ username, setUsername, password, setPassword, handleLogin, 
 
           <form className="auth-form" onSubmit={handleLogin}>
             <div className="auth-field">
-              <label htmlFor="login-username">Usuario</label>
+              <label htmlFor="login-username">{formDetails.usernameLabel}</label>
               <input
                 id="login-username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Correo o usuario"
+                placeholder={formDetails.usernamePlaceholder}
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
