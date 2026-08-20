@@ -474,16 +474,6 @@
   "sessions": [],
   "authChallenges": [
     {
-      "id": "17ebf981-2914-4057-9c93-36603b3a6220",
-      "username": "doctor.medicenter",
-      "purpose": "mfa-enrollment",
-      "createdAt": "2026-08-20T20:30:56.741Z",
-      "expiresAt": "2026-08-20T20:35:56.741Z",
-      "attempts": 0,
-      "sessionVersion": 1,
-      "mfaEnrollmentSecret": "v1.s2u7nWWqdMQQuiqg.YfnQzB2CCuylnnHwa4nM9Q.biqZqJVKEJBQPisaAWfc9w"
-    },
-    {
       "id": "a7673b50-6983-4166-8e15-a930777b5150",
       "username": "doctor.medicenter",
       "purpose": "mfa-enrollment",
@@ -492,6 +482,16 @@
       "attempts": 0,
       "sessionVersion": 1,
       "mfaEnrollmentSecret": "v1.AHFPk1DQzV93dFm0.aHvBRrCl_e8c3tfOTxkMDQ.W-Koxb3qg86uMSmdm2EKag"
+    },
+    {
+      "id": "07b043ff-79ca-44a1-a13f-d4aff17cd332",
+      "username": "doctor.medicenter",
+      "purpose": "mfa-enrollment",
+      "createdAt": "2026-08-20T20:38:13.246Z",
+      "expiresAt": "2026-08-20T20:43:13.246Z",
+      "attempts": 0,
+      "sessionVersion": 1,
+      "mfaEnrollmentSecret": "v1.o7ZBUinkHqbu_Dz5.2y44pxzbL419uXNFz9-fHA.xkvawyntwPij9-fxl8ZC6Q"
     }
   ],
   "integrationConfig": {
