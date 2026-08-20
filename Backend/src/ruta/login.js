@@ -25,9 +25,18 @@ const { validatePassword } = require('../passwordPolicy');
 const MAX_LOGIN_FAILURES = 5;
 const LOGIN_LOCKOUT_MS = 15 * 60 * 1000;
 const LOGIN_PORTAL_ROLES = new Set(['paciente', 'doctor', 'admin']);
+const LOGIN_PORTAL_ROLE_ALIASES = new Map([
+  ['patient', 'paciente'],
+  ['paciente', 'paciente'],
+  ['doctor', 'doctor'],
+  ['admin', 'admin'],
+]);
 
 const getUserRole = (user) => String(user?.role || 'paciente').trim().toLowerCase();
-const normalizePortalRole = (role) => String(role || '').trim().toLowerCase();
+const normalizePortalRole = (role) => {
+  const normalizedRole = String(role || '').trim().toLowerCase();
+  return LOGIN_PORTAL_ROLE_ALIASES.get(normalizedRole) || normalizedRole;
+};
 
 const canAccessPortal = (userRole, portalRole) => {
   if (!portalRole) return true;
@@ -131,7 +140,7 @@ router.post('/login', (req, res) => {
 
   const normalizedUsername = normalizeUsername(usuario);
   const normalizedPassword = String(password || '');
-  const portalRole = normalizePortalRole(req.body?.portalRole);
+  const portalRole = normalizePortalRole(req.body?.role ?? req.body?.portalRole);
 
   if (portalRole && !LOGIN_PORTAL_ROLES.has(portalRole)) {
     return res.status(400).json({

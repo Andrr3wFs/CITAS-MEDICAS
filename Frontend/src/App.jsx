@@ -18,7 +18,7 @@ const WHATSAPP_DEMO_MESSAGE = 'Hola, estoy interesado en conocer la plataforma y
 const WHATSAPP_DEMO_URL = `https://wa.me/${WHATSAPP_DEMO_NUMBER}?text=${encodeURIComponent(WHATSAPP_DEMO_MESSAGE)}`
 
 const LOGIN_PORTAL_ROLES = [
-  { value: 'paciente', label: 'Paciente', Icon: UserRound },
+  { value: 'patient', label: 'Paciente', Icon: UserRound },
   { value: 'doctor', label: 'Médico', Icon: Stethoscope },
   { value: 'admin', label: 'Admin', Icon: ShieldCheck },
 ]
@@ -35,7 +35,7 @@ function App() {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [selectedLoginRole, setSelectedLoginRole] = useState('paciente')
+  const [selectedLoginRole, setSelectedLoginRole] = useState('patient')
   const [message, setMessage] = useState('')
   const [user, setUser] = useState(null)
   const [showRegister, setShowRegister] = useState(false)
@@ -127,7 +127,7 @@ function App() {
     return false
   }
 
-  const loginWithCredentials = async ({ username: nextUsername, password: nextPassword, portalRole }, nextAuthAction = 'manual') => {
+  const loginWithCredentials = async ({ username: nextUsername, password: nextPassword, role }, nextAuthAction = 'manual') => {
     setMessage('')
     setIsLoggingIn(true)
     setAuthAction(nextAuthAction)
@@ -138,7 +138,7 @@ function App() {
       const res = await api.post('/login', {
         usuario: normalizedUsername,
         password: nextPassword,
-        portalRole,
+        role,
       })
 
       establishSession(res.data)
@@ -147,7 +147,7 @@ function App() {
         setVerificationCredentials({
           username: err.response.data.username || normalizedUsername,
           password: nextPassword,
-          portalRole,
+          role,
           resendAvailableAt: err.response.data.resendAvailableAt,
         })
         return
@@ -209,7 +209,7 @@ function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    await loginWithCredentials({ username, password, portalRole: selectedLoginRole }, 'manual')
+    await loginWithCredentials({ username, password, role: selectedLoginRole }, 'manual')
   }
 
   const handleLogout = () => {
@@ -227,7 +227,7 @@ function App() {
     setUser(null)
     setUsername('')
     setPassword('')
-    setSelectedLoginRole('paciente')
+    setSelectedLoginRole('patient')
     setMessage('')
   }
 

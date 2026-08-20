@@ -117,8 +117,8 @@ const request = async (method, pathname, body, token, additionalHeaders = {}) =>
   return { status: response.status, body: await response.json() };
 };
 
-const enrollMfaAndGetSession = async (username, password) => {
-  const login = await request('POST', '/login', { usuario: username, password });
+const enrollMfaAndGetSession = async (username, password, role) => {
+  const login = await request('POST', '/login', { usuario: username, password, role });
   assert.equal(login.status, 403, `${username} debe requerir inscripción MFA.`);
   assert.equal(login.body.mfaEnrollmentRequired, true, `${username} no recibió un desafío MFA.`);
 
@@ -168,14 +168,14 @@ const run = async () => {
     const mismatchedPortal = await request('POST', '/login', {
       usuario: 'pacientea',
       password: 'Brisa#2026Fuerte',
-      portalRole: 'doctor',
+      role: 'doctor',
     });
     assert.equal(mismatchedPortal.status, 403, 'Un paciente pudo acceder al portal médico.');
 
     const patientLogin = await request('POST', '/login', {
       usuario: 'pacientea',
       password: 'Brisa#2026Fuerte',
-      portalRole: 'paciente',
+      role: 'patient',
     });
     assert.equal(patientLogin.status, 200, 'El paciente no obtuvo sesión.');
     const patientToken = patientLogin.body.token;
@@ -194,7 +194,7 @@ const run = async () => {
     const doctorSchedule = await request('GET', '/doctor/citas', undefined, patientToken);
     assert.equal(doctorSchedule.status, 403, 'El paciente accedió a horarios de médicos.');
 
-    const doctorToken = await enrollMfaAndGetSession('doctor1', 'Medico#2026Clave');
+    const doctorToken = await enrollMfaAndGetSession('doctor1', 'Medico#2026Clave', 'doctor');
     const doctorMetrics = await request('GET', '/metrics/appointments', undefined, doctorToken);
     assert.equal(doctorMetrics.status, 200, 'El médico MFA no pudo consultar sus métricas.');
     assert.equal(doctorMetrics.body.attended, 1, 'Las métricas del médico incluyen citas ajenas.');
@@ -214,7 +214,7 @@ const run = async () => {
     }, doctorToken);
     assert.equal(ownLabOrder.status, 200, 'El médico no pudo crear una orden de su cita asignada.');
 
-    const adminToken = await enrollMfaAndGetSession('admin', 'Luna#2026Clave');
+    const adminToken = await enrollMfaAndGetSession('admin', 'Luna#2026Clave', 'admin');
     const adminAppointments = await request('GET', '/admin/citas', undefined, adminToken);
     assert.equal(adminAppointments.status, 200, 'El administrador MFA no pudo acceder a su ruta.');
 
