@@ -141,15 +141,21 @@ const clearFailedLogins = (user) => {
 const findChallengeUser = (challenge) => users.find((user) => user.usuario === challenge?.username) || null;
 const MFA_CODE_PATTERN = /^\d{6}$/;
 
-const getTemporaryMfaSecret = (challenge) => String(
+const getLegacyTemporaryMfaSecret = (challenge) => String(
   challenge?.tempMfaSecret || challenge?.mfaEnrollmentSecret || ''
 ).trim();
 
-const getTemporaryMfaSecretSource = (challenge) => {
+const getLegacyTemporaryMfaSecretSource = (challenge) => {
   if (challenge?.tempMfaSecret) return 'tempMfaSecret';
   if (challenge?.mfaEnrollmentSecret) return 'legacy-mfaEnrollmentSecret';
   return null;
 };
+
+const getUserTemporaryMfaSecret = (user) => String(user?.mfaSecretTemp || '').trim();
+const isUserTemporaryMfaSecretBoundToChallenge = (user, challenge) => (
+  Boolean(getUserTemporaryMfaSecret(user))
+    && user?.mfaEnrollmentChallengeId === challenge?.id
+);
 
 const getMfaConfirmationRequest = (body) => {
   const requestBody = body && typeof body === 'object' ? body : {};
@@ -169,8 +175,9 @@ const getMfaConfirmationLogDetails = ({ challengeId, code, requestFields, challe
   codeFormatValid: MFA_CODE_PATTERN.test(code),
   challengeFound: Boolean(challenge),
   userFound: Boolean(user),
-  hasTemporarySecret: Boolean(getTemporaryMfaSecret(challenge)),
-  temporarySecretSource: getTemporaryMfaSecretSource(challenge),
+  hasTemporarySecret: Boolean(getUserTemporaryMfaSecret(user)),
+  temporarySecretBoundToChallenge: isUserTemporaryMfaSecretBoundToChallenge(user, challenge),
+  legacyTemporarySecretSource: getLegacyTemporaryMfaSecretSource(challenge),
   serverTime: new Date().toISOString(),
 });
 
@@ -327,22 +334,35 @@ router.post('/auth/mfa/enrollment', async (req, res) => {
 
   const createEnrollmentForChallenge = async () => {
     const enrollment = await createEnrollment(user.usuario);
-    challenge.tempMfaSecret = enrollment.encryptedSecret;
+    user.mfaSecretTemp = enrollment.encryptedSecret;
+    user.mfaEnrollmentChallengeId = challenge.id;
+    user.mfaEnrollmentStartedAt = new Date().toISOString();
+    delete challenge.tempMfaSecret;
     delete challenge.mfaEnrollmentSecret;
     saveData();
+
+    console.log('[MFA SETUP] Secret temporal persistido:', {
+      username: user.usuario,
+      challengeIdPrefix: `${challenge.id.slice(0, 8)}...`,
+      hasTemporarySecret: true,
+    });
     return enrollment;
   };
 
   try {
-    const temporaryMfaSecret = getTemporaryMfaSecret(challenge);
-    if (temporaryMfaSecret && !challenge.tempMfaSecret) {
-      challenge.tempMfaSecret = temporaryMfaSecret;
+    const legacyTemporaryMfaSecret = getLegacyTemporaryMfaSecret(challenge);
+    if (legacyTemporaryMfaSecret && !getUserTemporaryMfaSecret(user)) {
+      user.mfaSecretTemp = legacyTemporaryMfaSecret;
+      user.mfaEnrollmentChallengeId = challenge.id;
+      user.mfaEnrollmentStartedAt = new Date().toISOString();
+      delete challenge.tempMfaSecret;
       delete challenge.mfaEnrollmentSecret;
       saveData();
     }
 
-    const enrollment = challenge.tempMfaSecret
-      ? await createEnrollmentPresentation(user.usuario, challenge.tempMfaSecret)
+    const hasCurrentTemporarySecret = isUserTemporaryMfaSecretBoundToChallenge(user, challenge);
+    const enrollment = hasCurrentTemporarySecret
+      ? await createEnrollmentPresentation(user.usuario, getUserTemporaryMfaSecret(user))
       : await createEnrollmentForChallenge();
 
     return res.json({
@@ -401,10 +421,10 @@ router.post('/auth/mfa/confirm', (req, res) => {
 
   const challenge = getAuthChallenge(challengeId, 'mfa-enrollment');
   const user = findChallengeUser(challenge);
-  const temporaryMfaSecret = getTemporaryMfaSecret(challenge);
+  const temporaryMfaSecret = getUserTemporaryMfaSecret(user);
   logDetails = getMfaConfirmationLogDetails({ challengeId, code, requestFields, challenge, user });
 
-  if (!isChallengeCurrentForUser(challenge, user) || !isPrivilegedRole(getUserRole(user)) || !temporaryMfaSecret) {
+  if (!isChallengeCurrentForUser(challenge, user) || !isPrivilegedRole(getUserRole(user))) {
     console.warn('MFA confirm rejected: enrollment challenge is invalid or expired.', logDetails);
     return res.status(401).json({
       success: false,
@@ -413,9 +433,30 @@ router.post('/auth/mfa/confirm', (req, res) => {
     });
   }
 
+  if (!temporaryMfaSecret || !isUserTemporaryMfaSecretBoundToChallenge(user, challenge)) {
+    console.warn('MFA confirm rejected: no active temporary secret for the user.', logDetails);
+    return res.status(400).json({
+      success: false,
+      reason: 'missing-active-mfa-secret',
+      message: 'No se encontró un secreto MFA activo para este usuario.',
+    });
+  }
+
   try {
+    console.log('[MFA CONFIRM] User ID:', user.usuario);
+    console.log('[MFA CONFIRM] Secret en BD:', {
+      present: true,
+      encrypted: temporaryMfaSecret.startsWith('v1.'),
+      boundToChallenge: user.mfaEnrollmentChallengeId === challenge.id,
+    });
+    console.log('[MFA CONFIRM] Token recibido:', {
+      redacted: true,
+      length: code.length,
+      formatValid: MFA_CODE_PATTERN.test(code),
+    });
+
     const isCodeValid = verifyTotpCode(temporaryMfaSecret, code);
-    console.log('MFA confirm TOTP result:', { ...logDetails, isCodeValid });
+    console.log('[MFA CONFIRM] Resultado validación:', isCodeValid);
 
     if (!isCodeValid) {
       recordChallengeFailure(challenge);
@@ -433,6 +474,9 @@ router.post('/auth/mfa/confirm', (req, res) => {
   user.mfaEnabled = true;
   user.mfaEnrolledAt = new Date().toISOString();
   user.sessionVersion = Number(user.sessionVersion || 1) + 1;
+  delete user.mfaSecretTemp;
+  delete user.mfaEnrollmentChallengeId;
+  delete user.mfaEnrollmentStartedAt;
   delete challenge.tempMfaSecret;
   delete challenge.mfaEnrollmentSecret;
   saveData();

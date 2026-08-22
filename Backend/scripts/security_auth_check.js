@@ -157,7 +157,12 @@ const enrollMfaAndGetSession = async (username, password, role) => {
   const persistedEnrollmentChallenge = JSON.parse(fs.readFileSync(dataFile, 'utf8')).authChallenges.find(
     (challenge) => challenge.id === login.body.mfaChallengeId
   );
-  assert.ok(persistedEnrollmentChallenge?.tempMfaSecret, 'No se persistió el secreto MFA temporal.');
+  const persistedEnrollmentUser = JSON.parse(fs.readFileSync(dataFile, 'utf8')).users.find(
+    (user) => user.usuario === username
+  );
+  assert.ok(persistedEnrollmentUser?.mfaSecretTemp, 'No se persistió el secreto MFA temporal en el usuario.');
+  assert.equal(persistedEnrollmentUser?.mfaEnrollmentChallengeId, login.body.mfaChallengeId, 'El secreto MFA temporal no está vinculado al desafío.');
+  assert.equal(persistedEnrollmentChallenge?.tempMfaSecret, undefined, 'El secreto MFA temporal debe residir en el usuario.');
   assert.equal(persistedEnrollmentChallenge?.mfaEnrollmentSecret, undefined, 'El secreto MFA temporal conservó el campo heredado.');
 
   const repeatedEnrollment = await request('POST', '/auth/mfa/enrollment', { challengeId: login.body.mfaChallengeId });
@@ -192,6 +197,11 @@ const enrollMfaAndGetSession = async (username, password, role) => {
   });
   assert.equal(confirmation.status, 200, 'No se pudo confirmar MFA.');
   assert.ok(confirmation.body.token, 'MFA no emitió una sesión.');
+  const activatedUser = JSON.parse(fs.readFileSync(dataFile, 'utf8')).users.find(
+    (user) => user.usuario === username
+  );
+  assert.equal(activatedUser?.mfaSecret, persistedEnrollmentUser.mfaSecretTemp, 'No se activó el secreto MFA temporal validado.');
+  assert.equal(activatedUser?.mfaSecretTemp, undefined, 'El secreto MFA temporal no se eliminó después de activarlo.');
   assertMfaVerifiedSession(confirmation.body.token, username);
   return { token: confirmation.body.token, manualEntryKey: enrollment.body.manualEntryKey };
 };
@@ -203,6 +213,13 @@ const run = async () => {
   try {
     const spoofedRole = await request('GET', '/appointments', undefined, null, { 'x-user-role': 'admin' });
     assert.equal(spoofedRole.status, 401, 'Una cabecera de rol falsificada no puede acceder a citas.');
+
+    const missingTemporarySecret = await request('POST', '/auth/mfa/confirm', {
+      challengeId: 'recoverable-mfa-enrollment',
+      code: '123456',
+    });
+    assert.equal(missingTemporarySecret.status, 400, 'Un desafío MFA sin secreto temporal debe rechazarse.');
+    assert.equal(missingTemporarySecret.body.reason, 'missing-active-mfa-secret', 'Falta el motivo de secreto MFA temporal ausente.');
 
     const anonymousPush = await request('POST', '/push/subscriptions', {
       subscription: { endpoint: 'https://example.invalid/push' },
