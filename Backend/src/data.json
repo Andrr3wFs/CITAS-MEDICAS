@@ -379,11 +379,11 @@
       "role": "admin",
       "nombre": "Administracion MediCenter",
       "usuario": "admin.medicenter",
-      "password": "$2b$10$ytOHQ0.Jq8KO3pzsMXzDn.0x4dqPb/xUoAL0TGMQzmOqEfwT.PexG",
+      "password": "$2b$10$hzFWG86BYcsKbFEk6nKhJOshaBX1swy8oFJuEW0/DDEI9wMEDQ.Xu",
       "passwordPolicyVersion": 1,
-      "passwordChangeRequired": false,
+      "passwordChangeRequired": true,
       "mfaEnabled": false,
-      "sessionVersion": 1
+      "sessionVersion": 2
     },
     {
       "role": "doctor",
@@ -474,24 +474,13 @@
   "sessions": [],
   "authChallenges": [
     {
-      "id": "a7673b50-6983-4166-8e15-a930777b5150",
-      "username": "doctor.medicenter",
-      "purpose": "mfa-enrollment",
-      "createdAt": "2026-08-20T20:34:03.508Z",
-      "expiresAt": "2026-08-20T20:39:03.508Z",
+      "id": "c8e4d58f-e715-4dac-9607-d9e32bf23d2d",
+      "username": "admin.medicenter",
+      "purpose": "password-change",
+      "createdAt": "2026-08-22T16:53:08.515Z",
+      "expiresAt": "2026-08-22T16:58:08.515Z",
       "attempts": 0,
-      "sessionVersion": 1,
-      "mfaEnrollmentSecret": "v1.AHFPk1DQzV93dFm0.aHvBRrCl_e8c3tfOTxkMDQ.W-Koxb3qg86uMSmdm2EKag"
-    },
-    {
-      "id": "07b043ff-79ca-44a1-a13f-d4aff17cd332",
-      "username": "doctor.medicenter",
-      "purpose": "mfa-enrollment",
-      "createdAt": "2026-08-20T20:38:13.246Z",
-      "expiresAt": "2026-08-20T20:43:13.246Z",
-      "attempts": 0,
-      "sessionVersion": 1,
-      "mfaEnrollmentSecret": "v1.o7ZBUinkHqbu_Dz5.2y44pxzbL419uXNFz9-fHA.xkvawyntwPij9-fxl8ZC6Q"
+      "sessionVersion": 2
     }
   ],
   "integrationConfig": {
