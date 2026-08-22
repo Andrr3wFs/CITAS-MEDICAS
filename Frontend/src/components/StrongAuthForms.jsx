@@ -105,6 +105,7 @@ export function MfaEnrollmentForm({ challenge, onSession, onCancel }) {
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [retryVersion, setRetryVersion] = useState(0)
 
   useEffect(() => {
     let isMounted = true
@@ -112,6 +113,7 @@ export function MfaEnrollmentForm({ challenge, onSession, onCancel }) {
     const loadEnrollment = async () => {
       setIsLoading(true)
       setMessage('')
+      setEnrollment(null)
       try {
         const response = await api.post('/auth/mfa/enrollment', { challengeId: challenge.id })
         if (isMounted) {
@@ -132,7 +134,7 @@ export function MfaEnrollmentForm({ challenge, onSession, onCancel }) {
     return () => {
       isMounted = false
     }
-  }, [challenge.id])
+  }, [challenge.id, retryVersion])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -180,6 +182,15 @@ export function MfaEnrollmentForm({ challenge, onSession, onCancel }) {
             </button>
           </form>
         </>
+      )}
+      {!isLoading && !enrollment && (
+        <button
+          type="button"
+          className="auth-submit"
+          onClick={() => setRetryVersion((currentVersion) => currentVersion + 1)}
+        >
+          Reintentar configuración MFA
+        </button>
       )}
       <button type="button" className="auth-text-link auth-verification-cancel" onClick={onCancel}>Volver al inicio de sesión</button>
     </SecurityShell>

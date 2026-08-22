@@ -139,6 +139,28 @@ const clearFailedLogins = (user) => {
 };
 
 const findChallengeUser = (challenge) => users.find((user) => user.usuario === challenge?.username) || null;
+const MFA_CODE_PATTERN = /^\d{6}$/;
+
+const getMfaConfirmationRequest = (body) => {
+  const requestBody = body && typeof body === 'object' ? body : {};
+
+  return {
+    challengeId: String(requestBody.challengeId || '').trim(),
+    code: String(requestBody.code || '').trim(),
+    requestFields: Object.keys(requestBody),
+  };
+};
+
+const getMfaConfirmationLogDetails = ({ challengeId, code, requestFields, challenge, user }) => ({
+  requestFields,
+  hasChallengeId: Boolean(challengeId),
+  challengeIdPrefix: challengeId ? `${challengeId.slice(0, 8)}...` : null,
+  codeLength: code.length,
+  codeFormatValid: MFA_CODE_PATTERN.test(code),
+  challengeFound: Boolean(challenge),
+  userFound: Boolean(user),
+  serverTime: new Date().toISOString(),
+});
 
 const respondToMfaVerificationError = (res, challenge, error) => {
   if (error instanceof MfaSecretDecryptionError) {
@@ -149,8 +171,16 @@ const respondToMfaVerificationError = (res, challenge, error) => {
     });
   }
 
+  console.error('MFA verification failed unexpectedly:', {
+    challengeFound: Boolean(challenge),
+    errorName: error?.name || 'UnknownError',
+  });
   recordChallengeFailure(challenge);
-  return res.status(400).json({ success: false, message: 'El código MFA no es válido.' });
+  return res.status(500).json({
+    success: false,
+    reason: 'mfa-verification-failed',
+    message: 'No se pudo validar el código MFA. Inténtalo nuevamente.',
+  });
 };
 
 router.post('/login', (req, res) => {
@@ -326,17 +356,53 @@ router.post('/auth/mfa/enrollment', async (req, res) => {
 });
 
 router.post('/auth/mfa/confirm', (req, res) => {
-  const challenge = getAuthChallenge(req.body?.challengeId, 'mfa-enrollment');
+  const { challengeId, code, requestFields } = getMfaConfirmationRequest(req.body);
+  let logDetails = getMfaConfirmationLogDetails({ challengeId, code, requestFields });
+
+  console.log('MFA confirm request:', logDetails);
+
+  if (!challengeId || !code) {
+    console.warn('MFA confirm rejected: missing required fields.', logDetails);
+    return res.status(400).json({
+      success: false,
+      reason: 'missing-mfa-fields',
+      message: 'Debes enviar challengeId y un código MFA de seis dígitos.',
+    });
+  }
+
+  if (!MFA_CODE_PATTERN.test(code)) {
+    console.warn('MFA confirm rejected: invalid code format.', logDetails);
+    return res.status(400).json({
+      success: false,
+      reason: 'invalid-mfa-code-format',
+      message: 'El código MFA debe contener exactamente seis dígitos.',
+    });
+  }
+
+  const challenge = getAuthChallenge(challengeId, 'mfa-enrollment');
   const user = findChallengeUser(challenge);
+  logDetails = getMfaConfirmationLogDetails({ challengeId, code, requestFields, challenge, user });
 
   if (!isChallengeCurrentForUser(challenge, user) || !isPrivilegedRole(getUserRole(user)) || !challenge?.mfaEnrollmentSecret) {
-    return res.status(401).json({ success: false, message: 'La configuración MFA no es válida o venció.' });
+    console.warn('MFA confirm rejected: enrollment challenge is invalid or expired.', logDetails);
+    return res.status(401).json({
+      success: false,
+      reason: 'invalid-or-expired-mfa-challenge',
+      message: 'La configuración MFA no es válida o venció.',
+    });
   }
 
   try {
-    if (!verifyTotpCode(challenge.mfaEnrollmentSecret, req.body?.code)) {
+    const isCodeValid = verifyTotpCode(challenge.mfaEnrollmentSecret, code);
+    console.log('MFA confirm TOTP result:', { ...logDetails, isCodeValid });
+
+    if (!isCodeValid) {
       recordChallengeFailure(challenge);
-      return res.status(400).json({ success: false, message: 'El código MFA no es válido.' });
+      return res.status(400).json({
+        success: false,
+        reason: 'invalid-or-expired-mfa-code',
+        message: 'Código inválido o expirado.',
+      });
     }
   } catch (error) {
     return respondToMfaVerificationError(res, challenge, error);
@@ -350,6 +416,10 @@ router.post('/auth/mfa/confirm', (req, res) => {
   revokeUserSessions(user.usuario, 'mfa-enrolled');
   consumeAuthChallenge(challenge);
 
+  console.log('MFA confirm accepted:', {
+    challengeIdPrefix: `${challengeId.slice(0, 8)}...`,
+    serverTime: new Date().toISOString(),
+  });
   return sendSessionResponse(res, user, { mfaVerified: true });
 });
 

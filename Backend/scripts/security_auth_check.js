@@ -143,7 +143,7 @@ const assertMfaVerifiedSession = (token, username) => {
   assert.ok(Number.isFinite(Date.parse(session?.mfaVerifiedAt || '')), `${username} no registró mfaVerifiedAt.`);
 };
 
-const getPreviousStepCode = (secret) => authenticator.clone({ epoch: Date.now() - 30 * 1000 }).generate(secret);
+const getPreviousStepCode = (secret) => authenticator.clone({ epoch: Date.now() - 10 * 1000 }).generate(secret);
 
 const enrollMfaAndGetSession = async (username, password, role) => {
   const login = await request('POST', '/login', { usuario: username, password, role });
@@ -154,9 +154,31 @@ const enrollMfaAndGetSession = async (username, password, role) => {
   assert.equal(enrollment.status, 200, 'No se pudo emitir la configuración TOTP.');
   assert.ok(enrollment.body.manualEntryKey, 'No se emitió la clave TOTP.');
 
+  const missingCode = await request('POST', '/auth/mfa/confirm', {
+    challengeId: login.body.mfaChallengeId,
+  });
+  assert.equal(missingCode.status, 400, 'La confirmación MFA incompleta debe rechazarse.');
+  assert.equal(missingCode.body.reason, 'missing-mfa-fields', 'Falta el motivo de cuerpo MFA incompleto.');
+
+  const malformedCode = await request('POST', '/auth/mfa/confirm', {
+    challengeId: login.body.mfaChallengeId,
+    code: '12ab34',
+  });
+  assert.equal(malformedCode.status, 400, 'Un código MFA mal formado debe rechazarse.');
+  assert.equal(malformedCode.body.reason, 'invalid-mfa-code-format', 'Falta el motivo de formato MFA inválido.');
+
+  const validCode = getPreviousStepCode(enrollment.body.manualEntryKey);
+  const invalidCode = `${(Number(validCode[0]) + 1) % 10}${validCode.slice(1)}`;
+  const rejectedCode = await request('POST', '/auth/mfa/confirm', {
+    challengeId: login.body.mfaChallengeId,
+    code: invalidCode,
+  });
+  assert.equal(rejectedCode.status, 400, 'Un código MFA inválido debe rechazarse.');
+  assert.equal(rejectedCode.body.reason, 'invalid-or-expired-mfa-code', 'Falta el motivo de código MFA inválido.');
+
   const confirmation = await request('POST', '/auth/mfa/confirm', {
     challengeId: login.body.mfaChallengeId,
-    code: getPreviousStepCode(enrollment.body.manualEntryKey),
+    code: validCode,
   });
   assert.equal(confirmation.status, 200, 'No se pudo confirmar MFA.');
   assert.ok(confirmation.body.token, 'MFA no emitió una sesión.');

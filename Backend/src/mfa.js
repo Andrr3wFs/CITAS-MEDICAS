@@ -93,6 +93,14 @@ const createEnrollment = async (username) => {
   const secret = authenticator.generateSecret();
   const encryptedSecret = encryptMfaSecret(secret);
 
+  // PRUEBA TEMPORAL
+  const decryptedSecret = decryptMfaSecret(encryptedSecret);
+
+  console.log(
+    'MFA DEBUG - secreto original y descifrado coinciden:',
+    secret === decryptedSecret
+  );
+
   return {
     encryptedSecret,
     ...(await createEnrollmentPresentation(username, encryptedSecret)),
@@ -100,13 +108,21 @@ const createEnrollment = async (username) => {
 };
 
 const verifyTotpCode = (encryptedSecret, code) => {
-  if (!/^\d{6}$/.test(String(code || '').trim())) {
+  const normalizedCode = String(code || '').trim();
+
+  if (!/^\d{6}$/.test(normalizedCode)) {
     return false;
   }
 
   const secret = decryptMfaSecret(encryptedSecret);
-  const totpAuthenticator = authenticator.clone({ window: MFA_TOTP_WINDOW });
-  return totpAuthenticator.check(String(code).trim(), secret);
+  const totpAuthenticator = authenticator.clone();
+
+  totpAuthenticator.options = {
+    ...totpAuthenticator.options,
+    window: MFA_TOTP_WINDOW,
+  };
+
+  return totpAuthenticator.check(normalizedCode, secret);
 };
 
 module.exports = {
