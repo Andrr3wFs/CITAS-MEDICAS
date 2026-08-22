@@ -3,7 +3,7 @@ const { authenticator } = require('otplib');
 const QRCode = require('qrcode');
 
 const MFA_ISSUER = process.env.MFA_ISSUER || 'MediCenter';
-const MFA_TOTP_WINDOW = 1;
+const MFA_TOTP_WINDOW = 2;
 const MFA_SECRET_PATTERN = /^[A-Z2-7]+={0,6}$/i;
 
 class MfaSecretDecryptionError extends Error {
@@ -93,14 +93,6 @@ const createEnrollment = async (username) => {
   const secret = authenticator.generateSecret();
   const encryptedSecret = encryptMfaSecret(secret);
 
-  // PRUEBA TEMPORAL
-  const decryptedSecret = decryptMfaSecret(encryptedSecret);
-
-  console.log(
-    'MFA DEBUG - secreto original y descifrado coinciden:',
-    secret === decryptedSecret
-  );
-
   return {
     encryptedSecret,
     ...(await createEnrollmentPresentation(username, encryptedSecret)),
@@ -122,7 +114,7 @@ const verifyTotpCode = (encryptedSecret, code) => {
     window: MFA_TOTP_WINDOW,
   };
 
-  return totpAuthenticator.check(normalizedCode, secret);
+  return totpAuthenticator.verify({ token: normalizedCode, secret });
 };
 
 module.exports = {

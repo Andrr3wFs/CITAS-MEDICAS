@@ -143,7 +143,7 @@ const assertMfaVerifiedSession = (token, username) => {
   assert.ok(Number.isFinite(Date.parse(session?.mfaVerifiedAt || '')), `${username} no registró mfaVerifiedAt.`);
 };
 
-const getPreviousStepCode = (secret) => authenticator.clone({ epoch: Date.now() - 10 * 1000 }).generate(secret);
+const getPreviousStepCode = (secret) => authenticator.clone({ epoch: Date.now() - 59 * 1000 }).generate(secret);
 
 const enrollMfaAndGetSession = async (username, password, role) => {
   const login = await request('POST', '/login', { usuario: username, password, role });
@@ -153,6 +153,16 @@ const enrollMfaAndGetSession = async (username, password, role) => {
   const enrollment = await request('POST', '/auth/mfa/enrollment', { challengeId: login.body.mfaChallengeId });
   assert.equal(enrollment.status, 200, 'No se pudo emitir la configuración TOTP.');
   assert.ok(enrollment.body.manualEntryKey, 'No se emitió la clave TOTP.');
+
+  const persistedEnrollmentChallenge = JSON.parse(fs.readFileSync(dataFile, 'utf8')).authChallenges.find(
+    (challenge) => challenge.id === login.body.mfaChallengeId
+  );
+  assert.ok(persistedEnrollmentChallenge?.tempMfaSecret, 'No se persistió el secreto MFA temporal.');
+  assert.equal(persistedEnrollmentChallenge?.mfaEnrollmentSecret, undefined, 'El secreto MFA temporal conservó el campo heredado.');
+
+  const repeatedEnrollment = await request('POST', '/auth/mfa/enrollment', { challengeId: login.body.mfaChallengeId });
+  assert.equal(repeatedEnrollment.status, 200, 'No se pudo recuperar la inscripción MFA pendiente.');
+  assert.equal(repeatedEnrollment.body.manualEntryKey, enrollment.body.manualEntryKey, 'El QR y la confirmación no usan el mismo secreto temporal.');
 
   const missingCode = await request('POST', '/auth/mfa/confirm', {
     challengeId: login.body.mfaChallengeId,
