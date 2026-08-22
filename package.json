@@ -10,7 +10,9 @@
     "dev": "node index.js",
     "start": "node index.js",
     "test": "npm run test:security",
-    "test:security": "node Backend/scripts/security_auth_check.js"
+    "test:security": "node Backend/scripts/security_auth_check.js",
+    "data:synthetic": "node Backend/scripts/create_synthetic_dataset.js --output Backend/data/synthetic-data.json --force",
+    "audit:verify": "node Backend/scripts/verify_audit_log_chain.js"
   },
   "dependencies": {
     "axios": "^1.4.0",

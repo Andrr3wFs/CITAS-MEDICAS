@@ -3,11 +3,18 @@ const router = express.Router();
 const { appointments, users, accessRequests, saveData, normalizeUsername, hashPasswordSync, PASSWORD_POLICY_VERSION } = require('../storage');
 const { authenticate, getRequestUserRole, getRequestUsername } = require('../auth');
 const { getAvailabilityError } = require('../appointmentAvailability');
-const { auditMutation } = require('../middleware/audit');
+const { auditAccess, auditMutation } = require('../middleware/audit');
 const { validatePassword } = require('../passwordPolicy');
 
 const sanitizeText = (value) => String(value || '').trim().replace(/[<>]/g, (match) => (match === '<' ? '&lt;' : '&gt;'));
 const patientAppointmentStatuses = ['solicitada', 'aprobada', 'rechazada', 'cancelada', 'pendiente', 'atendida'];
+const hasClinicalHistoryData = (appointment) => Boolean(
+  appointment?.diagnostico
+    || appointment?.triage
+    || Object.entries(appointment?.clinicalHistory || {}).some(([field, value]) => (
+      !['updatedAt', 'updatedBy'].includes(field) && Boolean(value)
+    ))
+);
 
 const getNextAppointmentId = () => appointments.reduce((highestId, appointment) => {
   const id = Number(appointment.id);
@@ -135,7 +142,12 @@ router.post('/citas', auditMutation({
   return res.status(201).json({ success: true, appointment });
 });
 
-router.get('/citas', (req, res) => {
+router.get('/citas', auditAccess({
+  action: 'patient.clinical_history.read',
+  entityType: 'clinical_history',
+  getEntityIds: (req, res) => res.locals.clinicalHistoryAccessIds,
+  metadata: () => ({ source: 'patient-appointments' }),
+}), (req, res) => {
   const estado = String(req.query.estado || '').trim();
   if (estado && !patientAppointmentStatuses.includes(estado)) {
     return res.status(400).json({ success: false, message: 'Estado de cita inválido' });
@@ -144,6 +156,9 @@ router.get('/citas', (req, res) => {
   const patientAppointments = appointments.filter((appointment) => (
     appointment.patientId === req.patient.usuario && (!estado || appointment.estado === estado)
   ));
+  res.locals.clinicalHistoryAccessIds = patientAppointments
+    .filter(hasClinicalHistoryData)
+    .map((appointment) => appointment.id);
   return res.json({ success: true, appointments: patientAppointments });
 });
 
@@ -183,7 +198,12 @@ router.put('/citas/:id/cancelar', auditMutation({
   return res.json({ success: true, appointment });
 });
 
-router.get('/historial', (req, res) => {
+router.get('/historial', auditAccess({
+  action: 'patient.clinical_history.read',
+  entityType: 'clinical_history',
+  getEntityIds: (req, res) => res.locals.clinicalHistoryAccessIds,
+  metadata: () => ({ source: 'patient-history' }),
+}), (req, res) => {
   const history = appointments
     .filter((appointment) => appointment.patientId === req.patient.usuario && appointment.estado === 'atendida')
     .filter((appointment) => appointment.clinicalHistory?.diagnosis || appointment.diagnostico)
@@ -197,6 +217,7 @@ router.get('/historial', (req, res) => {
       history: appointment.clinicalHistory,
     }));
 
+  res.locals.clinicalHistoryAccessIds = history.map((entry) => entry.appointmentId);
   return res.json({ success: true, history });
 });
 

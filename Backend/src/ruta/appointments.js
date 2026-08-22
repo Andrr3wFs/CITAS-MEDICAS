@@ -5,7 +5,7 @@ const { appointments, saveData } = require('../storage');
 const { getAvailabilityError } = require('../appointmentAvailability');
 const { sendPushNotificationToUsers } = require('../pushNotifications');
 const { authenticate, getRequestUserRole, getRequestUsername, normalizeUsername } = require('../auth');
-const { auditMutation } = require('../middleware/audit');
+const { auditAccess, auditMutation } = require('../middleware/audit');
 
 const allowedStatuses = ['pendiente', 'aprobada', 'rechazada', 'atendida', 'cancelada', 'no_asistencia'];
 
@@ -26,6 +26,13 @@ const canWriteMedicalHistory = (req) => getRequestUserRole(req) === 'doctor';
 const isDoctorAssignedToAppointment = (req, appointment) =>
   getRequestUserRole(req) === 'doctor' && appointment?.doctorUsername === getRequestUsername(req);
 const isPatientOwner = (req, appointment) => appointment?.patientId === getRequestUsername(req);
+const hasClinicalHistoryData = (appointment) => Boolean(
+  appointment?.diagnostico
+    || appointment?.triage
+    || Object.entries(appointment?.clinicalHistory || {}).some(([field, value]) => (
+      !['updatedAt', 'updatedBy'].includes(field) && Boolean(value)
+    ))
+);
 
 const filterAppointmentsByUser = (appointmentsList, req) => {
   const role = getRequestUserRole(req);
@@ -134,12 +141,25 @@ router.post('/appointments', auditMutation({
 });
 
 // Obtener todas las citas
-router.get('/appointments', (req, res) => {
+router.get('/appointments', auditAccess({
+  action: 'clinical_history.read',
+  entityType: 'clinical_history',
+  getEntityIds: (req, res) => res.locals.clinicalHistoryAccessIds,
+  metadata: () => ({ source: 'appointments-list' }),
+}), (req, res) => {
   const visibleAppointments = filterAppointmentsByUser(appointments, req);
+  res.locals.clinicalHistoryAccessIds = visibleAppointments
+    .filter(hasClinicalHistoryData)
+    .map((appointment) => appointment.id);
   res.json({ success: true, appointments: visibleAppointments });
 });
 
-router.get('/appointments/:id', (req, res) => {
+router.get('/appointments/:id', auditAccess({
+  action: 'clinical_history.read',
+  entityType: 'clinical_history',
+  getEntityIds: (req, res) => res.locals.clinicalHistoryAccessIds,
+  metadata: () => ({ source: 'appointment-detail' }),
+}), (req, res) => {
   const { id } = req.params;
   const appointment = appointments.find((a) => a.id == id);
 
@@ -148,6 +168,7 @@ router.get('/appointments/:id', (req, res) => {
   }
 
   if (canManageAppointments(req) || isDoctorAssignedToAppointment(req, appointment) || isPatientOwner(req, appointment)) {
+    res.locals.clinicalHistoryAccessIds = hasClinicalHistoryData(appointment) ? [appointment.id] : [];
     return res.json({ success: true, appointment });
   }
 

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { appointments, saveData } = require('../storage');
 const { authenticate, getRequestUserRole, getRequestUsername } = require('../auth');
-const { auditMutation } = require('../middleware/audit');
+const { auditAccess, auditMutation } = require('../middleware/audit');
 
 const sanitizeText = (value) => String(value || '').trim().replace(/[<>]/g, (match) => (match === '<' ? '&lt;' : '&gt;'));
 
@@ -31,10 +31,22 @@ const getAssignedAppointment = (appointmentId, doctorUsername) => appointments.f
   String(appointment.id) === String(appointmentId)
     && appointment.doctorUsername === doctorUsername
 ));
+const hasClinicalHistoryData = (appointment) => Boolean(
+  appointment?.diagnostico
+    || appointment?.triage
+    || Object.entries(appointment?.clinicalHistory || {}).some(([field, value]) => (
+      !['updatedAt', 'updatedBy'].includes(field) && Boolean(value)
+    ))
+);
 
 router.use(authenticate, requireDoctor);
 
-router.get('/citas', (req, res) => {
+router.get('/citas', auditAccess({
+  action: 'doctor.clinical_history.read',
+  entityType: 'clinical_history',
+  getEntityIds: (req, res) => res.locals.clinicalHistoryAccessIds,
+  metadata: () => ({ source: 'doctor-appointments' }),
+}), (req, res) => {
   const doctorUsername = getRequestUsername(req);
   const requestedDate = String(req.query.fecha || '').trim();
   const date = requestedDate === 'hoy' ? todayDate() : requestedDate;
@@ -47,6 +59,9 @@ router.get('/citas', (req, res) => {
     appointment.doctorUsername === doctorUsername && (!date || appointment.fecha === date)
   ));
 
+  res.locals.clinicalHistoryAccessIds = doctorAppointments
+    .filter(hasClinicalHistoryData)
+    .map((appointment) => appointment.id);
   return res.json({ success: true, appointments: doctorAppointments });
 });
 

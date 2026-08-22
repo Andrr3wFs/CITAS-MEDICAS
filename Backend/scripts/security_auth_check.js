@@ -98,6 +98,8 @@ const startServer = () => new Promise((resolve, reject) => {
       HOSPITAL_DATA_FILE: dataFile,
       JWT_SECRET: 'security-test-jwt-secret',
       MFA_ENCRYPTION_KEY: 'security-test-mfa-encryption-key',
+      AUDIT_LOG_HMAC_KEY: 'security-test-audit-hmac-key',
+      CORS_ALLOWED_ORIGINS: 'https://trusted.medicenter.test',
       DISABLE_EMAIL_NOTIFICATIONS: 'true',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -135,6 +137,22 @@ const getPersistedSession = (token) => {
   const sessionId = jwt.decode(token)?.sid;
   const persistedData = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
   return persistedData.sessions.find((session) => session.id === sessionId) || null;
+};
+
+const getPersistedAuditLog = async (predicate) => {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    try {
+      const persistedData = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+      const auditLog = persistedData.auditLogs.find(predicate);
+      if (auditLog) return auditLog;
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+    }
+
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+
+  return null;
 };
 
 const assertMfaVerifiedSession = (token, username) => {
@@ -211,6 +229,24 @@ const run = async () => {
   const server = await startServer();
 
   try {
+    const trustedCorsRequest = await fetch(`http://127.0.0.1:${PORT}/api/login`, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://trusted.medicenter.test',
+        'Access-Control-Request-Method': 'POST',
+      },
+    });
+    assert.equal(trustedCorsRequest.headers.get('access-control-allow-origin'), 'https://trusted.medicenter.test', 'El origen CORS autorizado no fue aceptado.');
+
+    const blockedCorsRequest = await fetch(`http://127.0.0.1:${PORT}/api/login`, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://untrusted.example.test',
+        'Access-Control-Request-Method': 'POST',
+      },
+    });
+    assert.equal(blockedCorsRequest.headers.get('access-control-allow-origin'), null, 'Un origen CORS no autorizado fue aceptado.');
+
     const spoofedRole = await request('GET', '/appointments', undefined, null, { 'x-user-role': 'admin' });
     assert.equal(spoofedRole.status, 401, 'Una cabecera de rol falsificada no puede acceder a citas.');
 
@@ -296,6 +332,14 @@ const run = async () => {
     const foreignHistory = await request('GET', '/paciente/historial', undefined, patientToken);
     assert.equal(foreignHistory.status, 200, 'El paciente no pudo consultar su propio historial.');
     assert.deepEqual(foreignHistory.body.history.map((entry) => entry.appointmentId), [1], 'El historial del paciente contiene datos ajenos.');
+    const persistedAuditLog = await getPersistedAuditLog((entry) => (
+      entry.action === 'patient.clinical_history.read'
+        && entry.actorUsername === 'pacientea'
+        && entry.entityId === '1'
+    ));
+    assert.ok(persistedAuditLog?.integrityHash, 'La lectura de historia clínica no dejó una bitácora firmada.');
+    assert.equal(persistedAuditLog?.changes?.changedFields?.length, 0, 'Una lectura no debe registrar contenido clínico como cambio.');
+    assert.equal(JSON.stringify(persistedAuditLog).includes('Diagnóstico privado A'), false, 'La bitácora expuso el diagnóstico clínico.');
 
     const doctorSchedule = await request('GET', '/doctor/citas', undefined, patientToken);
     assert.equal(doctorSchedule.status, 403, 'El paciente accedió a horarios de médicos.');

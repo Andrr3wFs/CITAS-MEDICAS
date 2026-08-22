@@ -15,6 +15,8 @@ Parte de [`.env.example`](.env.example) y establece valores aleatorios distintos
 
 Los límites se expresan en milisegundos mediante `SESSION_IDLE_TIMEOUT_MS`, `SESSION_ABSOLUTE_TIMEOUT_MS` y `AUTH_CHALLENGE_TIMEOUT_MS`.
 
+Configura también una `AUDIT_LOG_HMAC_KEY` distinta para firmar la cadena de auditoría y restringe `CORS_ALLOWED_ORIGINS` a los dominios web autorizados. Consulta [PRIVACY.md](PRIVACY.md) para los controles de privacidad, cifrado, datos sintéticos y trazabilidad clínica.
+
 ## Verificación
 
 Ejecuta `npm test` desde la raíz. La prueba crea datos temporales y verifica MFA para médicos y administradores, la política de contraseñas, el aislamiento entre pacientes, la limitación de datos por médico y la revocación de sesiones.

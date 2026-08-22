@@ -19,13 +19,39 @@ const path = require('path');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
+const isProduction = process.env.NODE_ENV === 'production';
+const defaultAllowedOrigins = isProduction
+  ? ['https://medicenters.uk']
+  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+const configuredAllowedOrigins = String(process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = new Set(configuredAllowedOrigins.length ? configuredAllowedOrigins : defaultAllowedOrigins);
 
 // Las decisiones de autorización se derivan exclusivamente de la sesión verificada.
+app.set('trust proxy', 1);
+app.use((req, res, next) => {
+  const forwardedProtocol = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim().toLowerCase();
+
+  if (isProduction && forwardedProtocol === 'http') {
+    return res.redirect(308, `https://${req.get('host')}${req.originalUrl}`);
+  }
+
+  if (isProduction && (req.secure || forwardedProtocol === 'https')) {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+
+  return next();
+});
+
 app.use(cors({
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin(origin, callback) {
+    callback(null, !origin || allowedOrigins.has(origin));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+  credentials: true,
 }));
 
 app.use(express.json());

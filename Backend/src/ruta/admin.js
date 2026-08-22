@@ -3,9 +3,16 @@ const router = express.Router();
 const { appointments, users, accessRequests, saveData, isPasswordHashed, hashPasswordSync, PASSWORD_POLICY_VERSION } = require('../storage');
 const { authenticate, getRequestUserRole } = require('../auth');
 const { getAvailabilityError } = require('../appointmentAvailability');
-const { auditMutation } = require('../middleware/audit');
+const { auditAccess, auditMutation } = require('../middleware/audit');
 
 const appointmentStatuses = ['solicitada', 'confirmada', 'reprogramada', 'rechazada'];
+const hasClinicalHistoryData = (appointment) => Boolean(
+  appointment?.diagnostico
+    || appointment?.triage
+    || Object.entries(appointment?.clinicalHistory || {}).some(([field, value]) => (
+      !['updatedAt', 'updatedBy'].includes(field) && Boolean(value)
+    ))
+);
 
 const requireAdmin = (req, res, next) => {
   if (getRequestUserRole(req) !== 'admin') {
@@ -74,7 +81,12 @@ router.put('/pacientes/:id/aprobar', auditMutation({
   return res.json({ success: true, patient });
 });
 
-router.get('/citas', (req, res) => {
+router.get('/citas', auditAccess({
+  action: 'admin.clinical_history.read',
+  entityType: 'clinical_history',
+  getEntityIds: (req, res) => res.locals.clinicalHistoryAccessIds,
+  metadata: () => ({ source: 'admin-appointments' }),
+}), (req, res) => {
   const { estado, pacienteId, doctorUsername, fechaDesde, fechaHasta } = req.query;
 
   if (estado && !appointmentStatuses.includes(estado)) {
@@ -90,6 +102,9 @@ router.get('/citas', (req, res) => {
     return true;
   });
 
+  res.locals.clinicalHistoryAccessIds = filteredAppointments
+    .filter(hasClinicalHistoryData)
+    .map((appointment) => appointment.id);
   return res.json({ success: true, appointments: filteredAppointments });
 });
 
